@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import ProductSelectPage from './ProductSelectPage';
 import InputGroup from 'react-bootstrap/InputGroup';
 import { Button, Col, FloatingLabel, Row, ToastContainer } from 'react-bootstrap';
-
+import axios from 'axios';
 
 const StyledDiv = styled.div`    
     margin-top: 5px;
@@ -19,8 +19,20 @@ const StyledDiv = styled.div`
  */
 function QuestionPage() {
   const [show, setShow] = useState(false);
-
   const [product, setProduct] = useState({ companyId: "", companyText: "", insId: "", insuranceText: "" })
+  const [question, setQuestion] = useState("");
+
+  const handlebtnSendClick = (e => {
+
+    axios.get(`/helloWorld?input=${question}`)
+    .then(response => {
+      console.log(response.data)
+      
+    })
+    .catch(error => console.log(error))
+
+
+  });
 
 
   /**
@@ -71,10 +83,10 @@ function QuestionPage() {
       {/* 질문하기 영역 */}
       <Row className="align-items-center">
         <Col xs="10">
-        <Form.Control type="text" id="inputQuestion" placeholder="질문하기" />
+        <Form.Control type="text" id="inputQuestion" placeholder="질문하기" value={question} onChange={(e)=>setQuestion(e.target.value)}/>
         </Col>
         <Col xs="auto">
-        <Button variant="outline-primary">전송</Button>
+        <Button variant="outline-primary" onClick={handlebtnSendClick}>전송</Button>
         </Col>
       </Row>
 
