@@ -1,0 +1,12 @@
+
+> pages
+    > HomePage
+    > QuestionPage[질의]
+    > ProductSelectPage[보험상품선택]
+        > insuranceCompanySelect[보험사선택]
+        > productSelect[보험상품선택]    
+> components
+    > header
+    > footer
+    > insuranceCompanySelect[보험사선택]
+    > productSelect[보험상품선택]    

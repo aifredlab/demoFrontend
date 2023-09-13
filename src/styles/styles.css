@@ -1,0 +1,15 @@
+input.insurance-select{
+    width: 80%;
+    padding-top: 10px;
+}
+
+
+div.buttonArea{
+    margin-top: 10px;
+    float: right;
+}
+
+div.buttonArea button{
+    margin-left: 10px;
+}
+
