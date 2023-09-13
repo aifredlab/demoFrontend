@@ -3,12 +3,7 @@ import { Button, Col, FloatingLabel, Toast, ToastContainer } from 'react-bootstr
 
 
 
-interface Props {
-  title: string;
-  content: string;
-}
-
-export default function Alert({title, content}: Props) {
+export default function Alert({title, content}) {
 
   const [show, setShow] = useState(true);
 

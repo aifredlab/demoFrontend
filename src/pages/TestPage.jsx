@@ -47,7 +47,7 @@ function TestPage() {
       defaultSelected={options.slice(0, 1)}
       id="selections-example"
       labelKey="name"
-      onInputChange={(text: string, e: ChangeEvent<HTMLInputElement>) => {
+      onInputChange={(text, e) => {
         console.log(text, e);
       }}
       options={options}

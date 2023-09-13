@@ -19,7 +19,7 @@ const StyledDiv = styled.div`
  * @param props 
  * @returns 
  */
-export default function ProductSelectPage(props: any) {
+export default function ProductSelectPage(props) {
 
     console.log("component reloaded..............");
 
@@ -52,9 +52,9 @@ export default function ProductSelectPage(props: any) {
 
 
     //라디오버튼 변경 이벤트 핸들러
-    const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleRadioChange = (e => {
         setSelectedRadioValue(e.target.value);
-    };
+    });
 
     //저장 버튼 클릭 이벤트 핸들러
     const onClickSaveButton = () => {
@@ -67,7 +67,7 @@ export default function ProductSelectPage(props: any) {
         if (selectedRadioValue == "0") { //보험찾기
             const insId = insurances.find(item => item.id == selectedInsuranceId)?.insId; //보험사id
 
-            const product: any = {
+            const product = {
                 companyId: insId,
                 companyText: companies.find(item => item.id == insId)?.text,
 
@@ -78,7 +78,7 @@ export default function ProductSelectPage(props: any) {
 
         }
         else { //보험선택
-            const product: any = {
+            const product = {
                 companyId: selectedCompanyId,
                 companyText: companies.find(item => item.id == selectedCompanyId)?.text,
                 insId: selectedInsuranceId,
@@ -93,7 +93,7 @@ export default function ProductSelectPage(props: any) {
      *  validation 테스트 코드
      * @param event 
      */
-    const handleSubmit = (event: any) => {
+    const handleSubmit = (event) => {
         const form = event.currentTarget;
         form.checkValidity()
         // if (form.checkValidity() === false) {

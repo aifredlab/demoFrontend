@@ -7,9 +7,6 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import { Button, Col, FloatingLabel, Row, ToastContainer } from 'react-bootstrap';
 
 
-export interface Product { companyId: string; companyText: string; insId: string; insuranceText: string; }
-
-
 const StyledDiv = styled.div`    
     margin-top: 5px;
     margin-bottom: 5px;
@@ -90,7 +87,7 @@ function QuestionPage() {
           {/* 팝업 본문 */}
           <ProductSelectPage
             saveCallBackFunc={ //저장 버튼 콜백
-              (product: any) => {
+              (product) => {
                 //setPopupSelectedProduct(...product) //TODO: 이렇게 안되는 이유는?
                 setProduct({
                   companyId: product.companyId,

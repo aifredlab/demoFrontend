@@ -3,16 +3,6 @@ import { Typeahead,  } from 'react-bootstrap-typeahead'; // ES2015
 import '../styles/styles.css'
 import 'react-bootstrap-typeahead/css/Typeahead.css'
 
-interface Insurance {
-    id: string;
-    text: string;
-    insId: string;
-}
-
-interface Insurances {
-    insurances: Insurance[];
-    callbackFunc: Function;
-}
 
 /**
  * 보험 선택 component
@@ -20,9 +10,9 @@ interface Insurances {
  * @returns 
  */
 //export default function InsuranceSelect({ insurances, callbackFunc}: Insurances) {
-export default function InsuranceSelect(props: any) {
+export default function InsuranceSelect(props) {
     
-    const onChangeEventHandler: any = (selected: any)=>{
+    const onChangeEventHandler = (selected)=>{
         props.selectCallbackFunc(selected[0]?.id)
     }
 
