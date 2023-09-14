@@ -24,23 +24,13 @@ function QuestionPage() {
 
   const handlebtnSendClick = (e => {
 
-    axios.get(`/helloWorld?input=${question}`)
-    .then(response => {
-      console.log(response.data)
-      
-    })
-    .catch(error => console.log(error))
+
 
 
   });
 
 
-  /**
-   * 초기화
-   */
-  useEffect(() => {
 
-  });
 
 
   return (

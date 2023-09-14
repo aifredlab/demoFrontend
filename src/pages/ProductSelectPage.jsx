@@ -1,4 +1,4 @@
-import { SetStateAction, useState } from 'react';
+import { SetStateAction, useState, useEffect } from 'react';
 import Form from 'react-bootstrap/Form';
 import CompanySelect from '../components/CompanySelect';
 import InsuranceSelect from '../components/InsuranceSelect';
@@ -7,7 +7,7 @@ import '../styles/styles.css'
 import Product from './QuestionPage';
 import Alert from '../components/Alert';
 import styled from 'styled-components';
-
+import axios from 'axios';
 
 const StyledDiv = styled.div`        
         margin-bottom: 5px;
@@ -23,31 +23,31 @@ export default function ProductSelectPage(props) {
 
     console.log("component reloaded..............");
 
-    
-
-    const [companies, setCompanies] = useState([{ id: "00", text: "삼성화재" },
-                                                { id: "01", text: "현대해상" },
-                                                { id: "02", text: "메리츠화재" },
-                                                { id: "03", text: "KB손해보험" },
-                                                { id: "04", text: "DB손해보험" },
-                                                { id: "05", text: "한화손해보험" },
-                                                { id: "06", text: "흥국화재" },
-                                                { id: "07", text: "롯데손해보험" },
-                                                { id: "08", text: "하나손해보험" },
-                                                ]);
-
-    const [insurances, setInsurances] = useState([{ id: "0000", insId: "00", text: "삼성화재 다이렉트운전자보험" },
-                                                { id: "0001", insId: "00", text: "삼성화재 애니카 다이렉트" },
-                                                { id: "0002", insId: "00", text: "삼성화재 다이렉트 어린이보험" },
-                                                { id: "0003", insId: "00", text: "삼성화재 다이렉트 실손보험" },
-                                                { id: "0010", insId: "01", text: "어린이보험" },
-                                                ]);
-
+    const [companies, setCompanies] = useState([]);
+    const [insurances, setInsurances] = useState([]);
     const [selectedRadioValue, setSelectedRadioValue] = useState("0");
     const [selectedCompanyId, setSelectedCompanyId] = useState("");
     const [selectedInsuranceId, setSelectedInsuranceId] = useState("");
-
     const [validated, setValidated] = useState(false);
+
+    //초기화
+    useEffect(() => {
+        axios.get('/getAllInsCompanies')
+            .then(response => {
+                console.log("getAllInsCompanies->" + response.data.length); //TODO:에러처리
+                setCompanies(response.data);
+                console.log("companies->" + companies); //TODO:에러처리
+
+
+                axios.get('/getAllInsurances')
+                    .then(response => {
+                        console.log("getAllInsurances->" + response.data.length); //TODO:에러처리
+                        setInsurances(response.data);
+                    })
+                    .catch(error => console.log(error))
+            })
+            .catch(error => console.log(error))
+    }, []);
 
 
 
@@ -59,7 +59,7 @@ export default function ProductSelectPage(props) {
     //저장 버튼 클릭 이벤트 핸들러
     const onClickSaveButton = () => {
 
-        
+
         if (selectedInsuranceId == "") {
             return <Alert title={'보험찾기'} content={'보험이 선택되지 않았습니다.'} />
         }
@@ -69,10 +69,10 @@ export default function ProductSelectPage(props) {
 
             const product = {
                 companyId: insId,
-                companyText: companies.find(item => item.id == insId)?.text,
+                companyText: companies.find(item => item.id == insId)?.name,
 
                 insId: selectedInsuranceId,
-                insuranceText: insurances.find(item => item.id == selectedInsuranceId)?.text
+                insuranceText: insurances.find(item => item.id == selectedInsuranceId)?.name
             };
             props.saveCallBackFunc(product);
 
@@ -80,9 +80,9 @@ export default function ProductSelectPage(props) {
         else { //보험선택
             const product = {
                 companyId: selectedCompanyId,
-                companyText: companies.find(item => item.id == selectedCompanyId)?.text,
+                companyText: companies.find(item => item.id == selectedCompanyId)?.name,
                 insId: selectedInsuranceId,
-                insuranceText: insurances.find(item => item.id == selectedInsuranceId)?.text
+                insuranceText: insurances.find(item => item.id == selectedInsuranceId)?.name
             };
             props.saveCallBackFunc(product);
         }
@@ -132,7 +132,7 @@ export default function ProductSelectPage(props) {
             <div>
 
                 <StyledDiv>
-                     {selectedRadioValue == "0" ? <InsuranceSelect selectCallbackFunc={setSelectedInsuranceId} insurances={insurances} />
+                    {selectedRadioValue == "0" ? <InsuranceSelect selectCallbackFunc={setSelectedInsuranceId} insurances={insurances} />
                         : <CompanySelect selectCallbackFunc={setSelectedCompanyId} companies={companies} />}
                 </StyledDiv>
 

@@ -21,7 +21,7 @@ export default function InsuranceSelect(props) {
             <Typeahead
                 clearButton
                 id="basic-typeahead-single"
-                labelKey="text"
+                labelKey="name"
                 options={props.insurances}
                 placeholder="보험 찾기"
                 onChange={onChangeEventHandler}
