@@ -5,12 +5,19 @@ import { useEffect, useState } from 'react';
 import ProductSelectPage from './ProductSelectPage';
 import InputGroup from 'react-bootstrap/InputGroup';
 import { Button, Col, FloatingLabel, Row, ToastContainer, ListGroup } from 'react-bootstrap';
+import Spinner from 'react-bootstrap/Spinner';
 import axios from 'axios';
 import iconAi from '../images/icon_ai.png'
 import iconHuman from '../images/icon_human.png'
 import iconSend from '../images/icon_send.png'
-import icon_loading from '../images/icon_loading.gif'
 import Accordion from 'react-bootstrap/Accordion';
+import { useAccordionButton } from 'react-bootstrap/AccordionButton';
+
+
+ const StyledSpinner = styled(Spinner)`
+     margin-top: 5px;    
+   `;
+
 
 const StyledDiv = styled.div`    
     margin-top: 5px;
@@ -31,14 +38,26 @@ function QuestionPage() {
 
   const [chatList, setChatList] = useState([]);
 
-
-  //질문버튼 클릭
+  const decoratedOnClick = useAccordionButton("0", () =>
+    console.log('totally custom!'),
+  );
+  
+  
+  /**
+   * 질문버튼 클릭
+   * @param e 
+   */
   const handleBtnSendClick = (e => {
 
     const humanQuestion = {'who':'1', 'contents': question};
     const aiAnswer = {'who':'2', 'contents': ''};
-    
-    setChatList((prevChatList)=>[...prevChatList, {...humanQuestion, id: String(prevChatList.length + 1)}, {...aiAnswer, id: String(prevChatList.length + 2)}]);
+
+    setQuestion("");
+    decoratedOnClick();
+
+    setChatList((prevChatList)=>[...prevChatList, 
+      {...humanQuestion, key: String(prevChatList.length + 1)}, 
+      {...aiAnswer, key: String(prevChatList.length + 2)}]);
 
     axios.get('/askQuestion')
     .then(response => {
@@ -84,16 +103,16 @@ function QuestionPage() {
             </Accordion.Body>
           </Accordion.Item>
           <Accordion.Item eventKey="1">
-            <Accordion.Header>Accordion Item #1</Accordion.Header>
+            <Accordion.Header>질의응답</Accordion.Header>
             <Accordion.Body>
               <ListGroup>
                 {
                   chatList.map((chat, i)=>{
                     if (chat.who == "1") { //사용자
-                      return <ListGroup.Item variant="primary" id={chat.id}><img src={iconHuman} width='25' height='25'></img> {chat.contents}</ListGroup.Item>
+                      return <ListGroup.Item variant="primary" key={chat.key}><img src={iconHuman} width='25' height='25'></img> {chat.contents}</ListGroup.Item>
                     }
                     else { //ai
-                      return <ListGroup.Item id={chat.id}><img src={iconAi} width='25' height='25'></img> {chat.contents || <img src={icon_loading} />}</ListGroup.Item>
+                      return <ListGroup.Item key={chat.key}><img src={iconAi} width='25' height='25'></img> {chat.contents || <StyledSpinner animation="border" />}</ListGroup.Item>
                     }
                   })
                 }
