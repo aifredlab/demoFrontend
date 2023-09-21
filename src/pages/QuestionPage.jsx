@@ -12,7 +12,11 @@ import iconHuman from '../images/icon_human.png'
 import iconSend from '../images/icon_send.png'
 import Accordion from 'react-bootstrap/Accordion';
 import { useAccordionButton } from 'react-bootstrap/AccordionButton';
-
+import Card from 'react-bootstrap/Card';
+import AccordionContext from 'react-bootstrap/AccordionContext';
+import { useContext } from 'react';
+const PINK = 'rgba(255, 192, 203, 0.6)';
+const BLUE = 'rgba(0, 0, 255, 0.6)';
 
  const StyledSpinner = styled(Spinner)`
      margin-top: 5px;    
@@ -25,6 +29,29 @@ const StyledDiv = styled.div`
     height: 30%;
     overflow-y: auto;
   `;
+
+
+    
+
+  function ContextAwareToggle({ children, eventKey, callback }) {
+
+    const { activeEventKey } = useContext(AccordionContext);
+    
+    const decoratedOnClick = useAccordionButton( eventKey, () => callback && callback(eventKey),);
+  
+    const isCurrentEventKey = activeEventKey === eventKey;
+  
+    return (
+      <button
+        type="button"
+        style={{ backgroundColor: isCurrentEventKey ? PINK : BLUE }}
+        onClick={decoratedOnClick}
+      >
+        {children}
+      </button>
+    );
+  }
+
 
 /**
  * 문의 페이지
@@ -41,7 +68,10 @@ function QuestionPage() {
   const decoratedOnClick = useAccordionButton("0", () =>
     console.log('totally custom!'),
   );
-  
+
+  const decoratedOnClick2 = useAccordionButton( "11", () => console.log('totally custom!'));
+
+
   
   /**
    * 질문버튼 클릭
@@ -73,7 +103,30 @@ function QuestionPage() {
   });
 
   return (
+
+    
     <Form>
+       <Accordion defaultActiveKey="00">
+      <Card>
+        <Card.Header>
+          <ContextAwareToggle eventKey="00">Click me!</ContextAwareToggle>
+        </Card.Header>
+        <Accordion.Collapse eventKey="00">
+          <Card.Body>Hello! I am the body</Card.Body>
+        </Accordion.Collapse>
+      </Card>
+      <Card>
+        <Card.Header>
+          <ContextAwareToggle eventKey="11">Click me!</ContextAwareToggle>
+        </Card.Header>
+        <Accordion.Collapse eventKey="11">
+          <Card.Body>Hello! I am another body</Card.Body>
+        </Accordion.Collapse>
+      </Card>
+      <Button variant="light" onClick={decoratedOnClick2}><img src={iconSend} width='25' height='25' /></Button>
+    </Accordion>
+
+
 
       <Row className="align-items-center">
         <Col xs="9">

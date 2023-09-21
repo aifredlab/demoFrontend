@@ -1,4 +1,4 @@
-import { SetStateAction, useState, useEffect } from 'react';
+import { SetStateAction, useState, useEffect, useRef } from 'react';
 import Form from 'react-bootstrap/Form';
 import CompanySelect from '../components/CompanySelect';
 import InsuranceSelect from '../components/InsuranceSelect';
@@ -8,7 +8,7 @@ import Product from './QuestionPage';
 import Alert from '../components/Alert';
 import styled from 'styled-components';
 import axios from 'axios';
-
+import { Typeahead,  } from 'react-bootstrap-typeahead';
 const StyledDiv = styled.div`        
         margin-bottom: 5px;
     `;
@@ -23,12 +23,16 @@ export default function ProductSelectPage(props) {
 
     console.log("component reloaded..............");
 
-    const [companies, setCompanies] = useState([]);
-    const [insurances, setInsurances] = useState([]);
+    const [companies, setCompanies] = useState([]); //보험사리스트
+    const [insurances, setInsurances] = useState([]); //보험상품리스트
+
+    //콤포넌트 값
     const [selectedRadioValue, setSelectedRadioValue] = useState("0");
     const [selectedCompanyId, setSelectedCompanyId] = useState("");
     const [selectedInsuranceId, setSelectedInsuranceId] = useState("");
     const [validated, setValidated] = useState(false);
+
+    const companySelectRef = useRef(null);
 
     //초기화
     useEffect(() => {
@@ -36,8 +40,6 @@ export default function ProductSelectPage(props) {
             .then(response => {
                 console.log("getAllInsCompanies->" + response.data.length); //TODO:에러처리
                 setCompanies(response.data);
-                console.log("companies->" + companies); //TODO:에러처리
-
 
                 axios.get('/getAllInsurances')
                     .then(response => {
@@ -49,8 +51,6 @@ export default function ProductSelectPage(props) {
             .catch(error => console.log(error))
     }, []);
 
-
-
     //라디오버튼 변경 이벤트 핸들러
     const handleRadioChange = (e => {
         setSelectedRadioValue(e.target.value);
@@ -58,10 +58,8 @@ export default function ProductSelectPage(props) {
 
     //저장 버튼 클릭 이벤트 핸들러
     const onClickSaveButton = () => {
-
-
         if (selectedInsuranceId == "") {
-            return <Alert title={'보험찾기'} content={'보험이 선택되지 않았습니다.'} />
+            //TODO: Alert띄우기
         }
 
         if (selectedRadioValue == "0") { //보험찾기
@@ -133,11 +131,14 @@ export default function ProductSelectPage(props) {
 
                 <StyledDiv>
                     {selectedRadioValue == "0" ? <InsuranceSelect selectCallbackFunc={setSelectedInsuranceId} insurances={insurances} />
-                        : <CompanySelect selectCallbackFunc={setSelectedCompanyId} companies={companies} />}
+                        : <CompanySelect companies={companies} selectCallbackFunc={(companyId)=> {
+                            setSelectedCompanyId(companyId);
+                            companySelectRef?.current?.clear(); //보험선택 초기화
+                        }}  />}
                 </StyledDiv>
 
                 <StyledDiv>
-                    {selectedRadioValue == "1" && <InsuranceSelect selectCallbackFunc={setSelectedInsuranceId} insurances={insurances.filter((item) => item.insId == selectedCompanyId)} />}
+                    {selectedRadioValue == "1" && <InsuranceSelect ref={companySelectRef} selectCallbackFunc={setSelectedInsuranceId} insurances={insurances.filter((item) => item.insId == selectedCompanyId)} />}
                 </StyledDiv>
 
                 {/* <InputGroup hasValidation>

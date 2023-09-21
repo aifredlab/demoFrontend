@@ -1,5 +1,6 @@
-import { ChangeEvent, useState } from 'react';
-import { Typeahead,  } from 'react-bootstrap-typeahead'; // ES2015
+import { ChangeEvent, useState, useRef, forwardRef } from 'react';
+
+import { Typeahead,  } from 'react-bootstrap-typeahead';
 import '../styles/styles.css'
 import 'react-bootstrap-typeahead/css/Typeahead.css'
 
@@ -10,7 +11,7 @@ import 'react-bootstrap-typeahead/css/Typeahead.css'
  * @returns 
  */
 //export default function InsuranceSelect({ insurances, callbackFunc}: Insurances) {
-export default function InsuranceSelect(props) {
+function InsuranceSelect(props, ref) {
     
     const onChangeEventHandler = (selected)=>{
         props.selectCallbackFunc(selected[0]?.id)
@@ -20,13 +21,16 @@ export default function InsuranceSelect(props) {
         <>
             <Typeahead
                 clearButton
-                id="basic-typeahead-single"
                 labelKey="name"
                 options={props.insurances}
                 placeholder="보험 찾기"
                 onChange={onChangeEventHandler}
                 //selected={selectedInsurance}
+                ref={ref}
             />
         </>
     );
 }
+
+
+export default forwardRef(InsuranceSelect);

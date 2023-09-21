@@ -16,7 +16,6 @@ export default function CompanySelect(props) {
         <>
             <Typeahead
                 clearButton
-                id="basic-typeahead-single"
                 labelKey="name"
                 options={props.companies}
                 placeholder="보험사 찾기"
