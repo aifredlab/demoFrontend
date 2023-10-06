@@ -19,6 +19,7 @@ export default function CompanySelect(props) {
                 labelKey="name"
                 options={props.companies}
                 placeholder="보험사 찾기"
+                id="companySelect"
                 onChange={onChangeEventHandler}
             />
         </>

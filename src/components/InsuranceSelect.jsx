@@ -26,6 +26,7 @@ function InsuranceSelect(props, ref) {
                 placeholder="보험 찾기"
                 onChange={onChangeEventHandler}
                 //selected={selectedInsurance}
+                id="insuranceSelect"
                 ref={ref}
             />
         </>

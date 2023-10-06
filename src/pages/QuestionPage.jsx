@@ -15,6 +15,8 @@ import { useAccordionButton } from 'react-bootstrap/AccordionButton';
 import Card from 'react-bootstrap/Card';
 import AccordionContext from 'react-bootstrap/AccordionContext';
 import { useContext } from 'react';
+import * as common from '../common';
+
 const PINK = 'rgba(255, 192, 203, 0.6)';
 const BLUE = 'rgba(0, 0, 255, 0.6)';
 
@@ -77,6 +79,31 @@ function QuestionPage() {
    * 질문버튼 클릭
    * @param e 
    */
+  // const handleBtnSendClick = (e => {
+
+  //   const humanQuestion = {'who':'1', 'contents': question};
+  //   const aiAnswer = {'who':'2', 'contents': ''};
+
+  //   setQuestion("");
+  //   decoratedOnClick();
+
+  //   setChatList((prevChatList)=>[...prevChatList, 
+  //     {...humanQuestion, key: String(prevChatList.length + 1)}, 
+  //     {...aiAnswer, key: String(prevChatList.length + 2)}]);
+
+  //   axios.get('/askQuestion')
+  //   .then(response => {
+  //     setChatList((prevChatList) => {
+  //       const lastIndex = prevChatList.length - 1;
+  //       const updatedChatList = [...prevChatList];
+  //       updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: response.data.response };
+  //       return updatedChatList;
+  //     });
+
+  //   })
+  //   .catch(error => console.log(error))
+  // });
+
   const handleBtnSendClick = (e => {
 
     const humanQuestion = {'who':'1', 'contents': question};
@@ -89,17 +116,32 @@ function QuestionPage() {
       {...humanQuestion, key: String(prevChatList.length + 1)}, 
       {...aiAnswer, key: String(prevChatList.length + 2)}]);
 
-    axios.get('/askQuestion')
-    .then(response => {
-      setChatList((prevChatList) => {
-        const lastIndex = prevChatList.length - 1;
-        const updatedChatList = [...prevChatList];
-        updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: response.data.response };
-        return updatedChatList;
-      });
+      fetch('/streamPush', {
+  headers: {
+    'Content-Type': 'application/stream+json'
+  }
+})
+  .then(response => {
+    const reader = response.body.getReader();
 
-    })
-    .catch(error => console.log(error))
+    const processData = async () => {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          break;
+        }
+        // value를 처리합니다.
+        console.log(value);
+      }
+    };
+
+    processData();
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+
+
   });
 
   return (
