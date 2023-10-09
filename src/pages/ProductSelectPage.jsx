@@ -46,9 +46,9 @@ export default function ProductSelectPage(props) {
                         console.log("getAllInsurances->" + response.data.length); //TODO:에러처리
                         setInsurances(response.data);
                     })
-                    .catch(error => console.log(error))
+                    .catch(error => alert("상품정보 조회 오류:" + error))
             })
-            .catch(error => console.log(error))
+            .catch(error => alert("보험사정보 조회 오류:" + error))
     }, []);
 
     //라디오버튼 변경 이벤트 핸들러
