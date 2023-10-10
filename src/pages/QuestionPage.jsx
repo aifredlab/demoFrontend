@@ -81,81 +81,81 @@ function QuestionPage() {
    * 질문버튼 클릭
    * @param e 
    */
+  // const handleBtnSendClick = (e => {
+
+  //   const humanQuestion = {'who':'1', 'contents': question};
+  //   const aiAnswer = {'who':'2', 'contents': ''};
+
+  //   setQuestion("");
+  //   decoratedOnClick();
+
+  //   setChatList((prevChatList)=>[...prevChatList, 
+  //     {...humanQuestion, key: String(prevChatList.length + 1)}, 
+  //     {...aiAnswer, key: String(prevChatList.length + 2)}]);
+
+  //   axios.get('/api/ask', {params: {
+  //                         question: question // 쿼리 매개변수 이름과 값을 여기에 추가
+  //                       }
+  //                     })
+  //   .then(response => {
+
+  //     setAgreement(response.data.agreementContents); 
+
+  //     //채팅내용 set
+  //     setChatList((prevChatList) => {
+  //       const lastIndex = prevChatList.length - 1;
+  //       const updatedChatList = [...prevChatList];
+  //       updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: response.data.reply };
+  //       return updatedChatList;
+  //     });
+
+  //   })
+  //   .catch(error => console.log(error))
+  // });
+
+  //스트림으로 요청
   const handleBtnSendClick = (e => {
 
     const humanQuestion = {'who':'1', 'contents': question};
     const aiAnswer = {'who':'2', 'contents': ''};
 
     setQuestion("");
-    decoratedOnClick();
+    //decoratedOnClick();
 
     setChatList((prevChatList)=>[...prevChatList, 
       {...humanQuestion, key: String(prevChatList.length + 1)}, 
       {...aiAnswer, key: String(prevChatList.length + 2)}]);
 
-    axios.get('/ask', {params: {
-                          question: question // 쿼리 매개변수 이름과 값을 여기에 추가
-                        }
-                      })
-    .then(response => {
+      //fetch('streamPush', {
+        fetch('/api/streamPush', { //TODO:왜 full url을 써야 할까?
+        headers: {
+          'Content-Type': 'application/stream+json'
+        }
+      }).then(async response => {
+        const reader = response.body.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            break;
+          }
 
-      setAgreement(response.data.agreementContents); 
+          const text = new TextDecoder('utf-8').decode(value);
 
-      //채팅내용 set
-      setChatList((prevChatList) => {
-        const lastIndex = prevChatList.length - 1;
-        const updatedChatList = [...prevChatList];
-        updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: response.data.reply };
-        return updatedChatList;
+          // value를 처리합니다.
+          console.log(text);
+
+          setChatList((prevChatList) => {
+            const lastIndex = prevChatList.length - 1;
+            const updatedChatList = [...prevChatList];
+            updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: updatedChatList[lastIndex].contents + text };
+            return updatedChatList;
+           });
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
       });
-
-    })
-    .catch(error => console.log(error))
   });
-
-  //스트림으로 요청
-  // const handleBtnSendClick2 = (e => {
-
-  //   const humanQuestion = {'who':'1', 'contents': question};
-  //   const aiAnswer = {'who':'2', 'contents': ''};
-
-  //   setQuestion("");
-  //   //decoratedOnClick();
-
-  //   setChatList((prevChatList)=>[...prevChatList, 
-  //     {...humanQuestion, key: String(prevChatList.length + 1)}, 
-  //     {...aiAnswer, key: String(prevChatList.length + 2)}]);
-
-  //     //fetch('streamPush', {
-  //       fetch('http://localhost:8080/streamPush', { //TODO:왜 full url을 써야 할까?
-  //       headers: {
-  //         'Content-Type': 'application/stream+json'
-  //       }
-  //     }).then(async response => {
-  //       const reader = response.body.getReader();
-  //       while (true) {
-  //         const { done, value } = await reader.read();
-  //         if (done) {
-  //           break;
-  //         }
-
-  //         const text = new TextDecoder('utf-8').decode(value);
-
-  //         // value를 처리합니다.
-  //         console.log(text);
-
-  //         setChatList((prevChatList) => {
-  //           const lastIndex = prevChatList.length - 1;
-  //           const updatedChatList = [...prevChatList];
-  //           updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: updatedChatList[lastIndex].contents + text };
-  //           return updatedChatList;
-  //          });
-  //       }
-  //     })
-  //     .catch(error => {
-  //       console.error('Error:', error);
-  //     });
-  // });
 
   return (
 

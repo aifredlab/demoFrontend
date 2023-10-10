@@ -36,12 +36,12 @@ export default function ProductSelectPage(props) {
 
     //초기화
     useEffect(() => {
-        axios.get('/getAllInsCompanies')
+        axios.get('/api/getAllInsCompanies')
             .then(response => {
                 console.log("getAllInsCompanies->" + response.data.length); //TODO:에러처리
                 setCompanies(response.data);
 
-                axios.get('/getAllInsurances')
+                axios.get('/api/getAllInsurances')
                     .then(response => {
                         console.log("getAllInsurances->" + response.data.length); //TODO:에러처리
                         setInsurances(response.data);
