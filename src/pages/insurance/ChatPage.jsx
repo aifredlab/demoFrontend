@@ -55,10 +55,11 @@ const ChatPage = () => {
     ]);
 
     axios
-      .get('/api/ask', {
-        params: {
-          question: question // 쿼리 매개변수 이름과 값을 여기에 추가
-        }
+      .post('/api/ask', {
+        question: question // 쿼리 매개변수 이름과 값을 여기에 추가
+        // params: {
+        //   question: question // 쿼리 매개변수 이름과 값을 여기에 추가
+        // }
       })
       .then((response) => {
         setAgreement(response.data.agreementContents);
