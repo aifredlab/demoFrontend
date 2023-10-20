@@ -72,7 +72,6 @@ const ChatPage = () => {
   //     .then((response) => {
   //       setAgreement(response.data.agreementContents);
 
-<<<<<<< HEAD
   //       //채팅내용 set
   //       setChatList((prevChatList) => {
   //         const lastIndex = prevChatList.length - 1;
