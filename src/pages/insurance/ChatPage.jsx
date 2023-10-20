@@ -31,6 +31,10 @@ import chatList from '../../menu-items/chatList';
 import * as React from 'react';
 import ProductSelectPage from './ProductSelectPage';
 
+import { useDispatch, useSelector } from 'react-redux';
+import { addChat } from 'store/reducers/chatHistory';
+import { dispatch } from 'store/index';
+
 const ChatPage = () => {
   const [open, setOpen] = useState(false); //상품선택팝업표시여부
   const [product, setProduct] = useState({ companyId: '', companyText: '', insId: '', insuranceText: '' });
@@ -55,10 +59,11 @@ const ChatPage = () => {
     ]);
 
     axios
-      .get('/api/ask', {
-        params: {
-          question: question // 쿼리 매개변수 이름과 값을 여기에 추가
-        }
+      .post('/api/ask', {
+        question: question // 쿼리 매개변수 이름과 값을 여기에 추가
+        // params: {
+        //   question: question // 쿼리 매개변수 이름과 값을 여기에 추가
+        // }
       })
       .then((response) => {
         setAgreement(response.data.agreementContents);
@@ -90,6 +95,15 @@ const ChatPage = () => {
           updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: '응답실패' };
           return updatedChatList;
         });
+
+        dispatch(
+          addChat({
+            ...chatList[chatList.length - 1],
+            type: 'item',
+            id: chatList.length - 1,
+            title: '이 상품을 가입해서 만기가 되면 보험료 전액 환급이 가능해?'
+          })
+        );
       });
   };
 
@@ -239,7 +253,7 @@ const ChatPage = () => {
               //저장 버튼 콜백
               (product) => {
                 //setPopupSelectedProduct(...product) //TODO: 이렇게 안되는 이유는?
-                console.log("zzzzdsfsdfasdfsdf")
+                console.log('zzzzdsfsdfasdfsdf');
                 setProduct({
                   companyId: product.companyId,
                   companyText: product.companyText,
