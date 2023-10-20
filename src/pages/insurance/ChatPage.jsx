@@ -31,6 +31,10 @@ import chatList from '../../menu-items/chatList';
 import * as React from 'react';
 import ProductSelectPage from './ProductSelectPage';
 
+import { useDispatch, useSelector } from 'react-redux';
+import { addChat } from 'store/reducers/chatHistory';
+import { dispatch } from 'store/index';
+
 const ChatPage = () => {
   const [open, setOpen] = useState(false); //상품선택팝업표시여부
   const [chatAccordionExpand, setChatAccordionExpand] = useState(false); //질의응답아코디언 확장여부
@@ -68,6 +72,7 @@ const ChatPage = () => {
   //     .then((response) => {
   //       setAgreement(response.data.agreementContents);
 
+<<<<<<< HEAD
   //       //채팅내용 set
   //       setChatList((prevChatList) => {
   //         const lastIndex = prevChatList.length - 1;
@@ -97,7 +102,6 @@ const ChatPage = () => {
   //       });
   //     });
   // };
-
   const handleClose = () => {
     setOpen(false);
   };
@@ -142,6 +146,15 @@ const ChatPage = () => {
             return updatedChatList;
            });
         }
+
+        dispatch(
+          addChat({
+            ...chatList[chatList.length - 1],
+            type: 'item',
+            id: chatList.length - 1,
+            title: '이 상품을 가입해서 만기가 되면 보험료 전액 환급이 가능해?'
+          })
+        );
       })
       .catch(error => {
         console.error('Error:', error);
@@ -252,7 +265,7 @@ const ChatPage = () => {
               //저장 버튼 콜백
               (product) => {
                 //setPopupSelectedProduct(...product) //TODO: 이렇게 안되는 이유는?
-                console.log("zzzzdsfsdfasdfsdf")
+                console.log('zzzzdsfsdfasdfsdf');
                 setProduct({
                   companyId: product.companyId,
                   companyText: product.companyText,
