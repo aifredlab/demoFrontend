@@ -27,7 +27,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Slide from '@mui/material/Slide';
-import chatList from '../../menu-items/chatList';
+import chatList from '../../chatHistory/chatList';
 import * as React from 'react';
 import ProductSelectPage from './ProductSelectPage';
 
@@ -106,32 +106,36 @@ const ChatPage = () => {
   };
 
   //스트림으로 요청
-  const handleBtnSendClick = (e => {
-
+  const handleBtnSendClick = (e) => {
     setChatAccordionExpand(true);
 
-    const humanQuestion = {'who':'1', 'contents': question};
-    const aiAnswer = {'who':'2', 'contents': ''};
+    const humanQuestion = { who: '1', contents: question };
+    const aiAnswer = { who: '2', contents: '' };
 
-    setQuestion("");
+    setQuestion('');
     //decoratedOnClick();
 
-    setChatList((prevChatList)=>[...prevChatList,
-      {...humanQuestion, key: String(prevChatList.length + 1)},
-      {...aiAnswer, key: String(prevChatList.length + 2)}]);
+    setChatList((prevChatList) => [
+      ...prevChatList,
+      { ...humanQuestion, key: String(prevChatList.length + 1) },
+      { ...aiAnswer, key: String(prevChatList.length + 2) }
+    ]);
 
-      //fetch('streamPush', {
-        fetch('/api/streamPush', { //TODO:왜 full url을 써야 할까?
-        headers: {
-          'Content-Type': 'application/stream+json'
-        }
-      }).then(async response => {
+    //fetch('streamPush', {
+    fetch('/api/askPush', {
+      headers: {
+        //'Content-Type': 'application/stream+json'
+        'Content-Type': 'text/event-stream'
+      }
+    })
+      .then(async (response) => {
         const reader = response.body.getReader();
-        while (true) {          
+        while (true) {
           const { done, value } = await reader.read();
           if (done) {
             break;
           }
+
 
           const text = new TextDecoder('utf-8').decode(value);
 
@@ -143,7 +147,7 @@ const ChatPage = () => {
             const updatedChatList = [...prevChatList];
             updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: updatedChatList[lastIndex].contents + text };
             return updatedChatList;
-           });
+          });
         }
 
         dispatch(
@@ -155,13 +159,13 @@ const ChatPage = () => {
           })
         );
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Error:', error);
       });
-  });
+  };
 
   const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       handleBtnSendClick();
     }
   };
@@ -238,7 +242,13 @@ const ChatPage = () => {
         </Accordion>
 
         <Stack spacing={1} direction="row">
-          <TextField fullWidth value={question} placeholder="질문하기" onChange={(e) => setQuestion(e.target.value)} onKeyPress={handleKeyPress} />
+          <TextField
+            fullWidth
+            value={question}
+            placeholder="질문하기"
+            onChange={(e) => setQuestion(e.target.value)}
+            onKeyPress={handleKeyPress}
+          />
           <IconButton aria-label="delete" onClick={handleBtnSendClick}>
             <SendIcon />
           </IconButton>

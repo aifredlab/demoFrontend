@@ -1,6 +1,7 @@
 // project import
 import Navigation from './Navigation';
 import SimpleBar from 'components/third-party/SimpleBar';
+import ChatHistory from './ChatHistory';
 
 // ==============================|| DRAWER CONTENT ||============================== //
 
@@ -14,6 +15,7 @@ const DrawerContent = () => (
     }}
   >
     <Navigation />
+    <ChatHistory />
   </SimpleBar>
 );
 

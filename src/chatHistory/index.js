@@ -1,11 +1,10 @@
 // project import
-import utilities from './utilities';
-import support from './support';
+import chatList from './chatList';
 
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
-  items: [utilities, support]
+  items: [chatList]
 };
 
 export default menuItems;
