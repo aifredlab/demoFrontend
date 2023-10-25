@@ -122,7 +122,8 @@ const ChatPage = () => {
     ]);
 
     //fetch('streamPush', {
-    fetch('/api/askPush', {
+    fetch('/api/ask', {
+      method: 'GET', //TODO: POST로 변경
       headers: {
         //'Content-Type': 'application/stream+json'
         'Content-Type': 'text/event-stream'
