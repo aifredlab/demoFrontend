@@ -27,7 +27,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Slide from '@mui/material/Slide';
-import chatList from '../../menu-items/chatList';
+import chatList from '../../chatHistory/chatList';
 import * as React from 'react';
 import ProductSelectPage from './ProductSelectPage';
 
@@ -37,6 +37,7 @@ import { dispatch } from 'store/index';
 
 const ChatPage = () => {
   const [open, setOpen] = useState(false); //상품선택팝업표시여부
+  const [chatAccordionExpand, setChatAccordionExpand] = useState(false); //질의응답아코디언 확장여부
   const [product, setProduct] = useState({ companyId: '', companyText: '', insId: '', insuranceText: '' });
   const [question, setQuestion] = useState('');
   const [agreement, setAgreement] = useState('');
@@ -46,11 +47,73 @@ const ChatPage = () => {
    * 질문버튼 클릭
    * @param e
    */
+  // const handleBtnSendClick = (e) => {
+
+  //  setChatAccordionExpand(true);
+
+  //   const humanQuestion = { who: '1', contents: question };
+  //   const aiAnswer = { who: '2', contents: '' };
+
+  //   setQuestion('');
+
+  //   setChatList((prevChatList) => [
+  //     ...prevChatList,
+  //     { ...humanQuestion, key: String(prevChatList.length + 1) },
+  //     { ...aiAnswer, key: String(prevChatList.length + 2) }
+  //   ]);
+
+  //   axios
+  //     .post('/api/ask', {
+  //       question: question // 쿼리 매개변수 이름과 값을 여기에 추가
+  //       // params: {
+  //       //   question: question // 쿼리 매개변수 이름과 값을 여기에 추가
+  //       // }
+  //     })
+  //     .then((response) => {
+  //       setAgreement(response.data.agreementContents);
+
+  //       //채팅내용 set
+  //       setChatList((prevChatList) => {
+  //         const lastIndex = prevChatList.length - 1;
+  //         const updatedChatList = [...prevChatList];
+  //         updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: response.data.reply };
+  //         return updatedChatList;
+  //       });
+
+  //       //왼쪽 사이드바 채팅목록 추가
+  //       // const children = {
+  //       //   //id: 'util-typography',
+  //       //   title: question,
+  //       //   type: 'item',
+  //       //   icon: icons.FontSizeOutlined
+  //       // };
+
+  //       // chatList.children = [...chatList.children, children];
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //       //채팅내용 set
+  //       setChatList((prevChatList) => {
+  //         const lastIndex = prevChatList.length - 1;
+  //         const updatedChatList = [...prevChatList];
+  //         updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: '응답실패' };
+  //         return updatedChatList;
+  //       });
+  //     });
+  // };
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  //스트림으로 요청
   const handleBtnSendClick = (e) => {
+    setChatAccordionExpand(true);
+
     const humanQuestion = { who: '1', contents: question };
     const aiAnswer = { who: '2', contents: '' };
 
     setQuestion('');
+    //decoratedOnClick();
 
     setChatList((prevChatList) => [
       ...prevChatList,
@@ -58,43 +121,35 @@ const ChatPage = () => {
       { ...aiAnswer, key: String(prevChatList.length + 2) }
     ]);
 
-    axios
-      .post('/api/ask', {
-        question: question // 쿼리 매개변수 이름과 값을 여기에 추가
-        // params: {
-        //   question: question // 쿼리 매개변수 이름과 값을 여기에 추가
-        // }
-      })
-      .then((response) => {
-        setAgreement(response.data.agreementContents);
+    //fetch('streamPush', {
+    fetch('/api/ask', {
+      method: 'GET', //TODO: POST로 변경
+      headers: {
+        //'Content-Type': 'application/stream+json'
+        'Content-Type': 'text/event-stream'
+      }
+    })
+      .then(async (response) => {
+        const reader = response.body.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            break;
+          }
 
-        //채팅내용 set
-        setChatList((prevChatList) => {
-          const lastIndex = prevChatList.length - 1;
-          const updatedChatList = [...prevChatList];
-          updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: response.data.reply };
-          return updatedChatList;
-        });
 
-        //왼쪽 사이드바 채팅목록 추가
-        // const children = {
-        //   //id: 'util-typography',
-        //   title: question,
-        //   type: 'item',
-        //   icon: icons.FontSizeOutlined
-        // };
+          const text = new TextDecoder('utf-8').decode(value);
 
-        // chatList.children = [...chatList.children, children];
-      })
-      .catch((error) => {
-        console.log(error);
-        //채팅내용 set
-        setChatList((prevChatList) => {
-          const lastIndex = prevChatList.length - 1;
-          const updatedChatList = [...prevChatList];
-          updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: '응답실패' };
-          return updatedChatList;
-        });
+          // value를 처리합니다.
+          console.log(text);
+
+          setChatList((prevChatList) => {
+            const lastIndex = prevChatList.length - 1;
+            const updatedChatList = [...prevChatList];
+            updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: updatedChatList[lastIndex].contents + text };
+            return updatedChatList;
+          });
+        }
 
         dispatch(
           addChat({
@@ -104,56 +159,17 @@ const ChatPage = () => {
             title: '이 상품을 가입해서 만기가 되면 보험료 전액 환급이 가능해?'
           })
         );
+      })
+      .catch((error) => {
+        console.error('Error:', error);
       });
   };
 
-  const handleClose = () => {
-    setOpen(false);
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleBtnSendClick();
+    }
   };
-
-  //스트림으로 요청
-  // const handleBtnSendClick2 = (e => {
-
-  //   const humanQuestion = {'who':'1', 'contents': question};
-  //   const aiAnswer = {'who':'2', 'contents': ''};
-
-  //   setQuestion("");
-  //   //decoratedOnClick();
-
-  //   setChatList((prevChatList)=>[...prevChatList,
-  //     {...humanQuestion, key: String(prevChatList.length + 1)},
-  //     {...aiAnswer, key: String(prevChatList.length + 2)}]);
-
-  //     //fetch('streamPush', {
-  //       fetch('http://localhost:8080/streamPush', { //TODO:왜 full url을 써야 할까?
-  //       headers: {
-  //         'Content-Type': 'application/stream+json'
-  //       }
-  //     }).then(async response => {
-  //       const reader = response.body.getReader();
-  //       while (true) {
-  //         const { done, value } = await reader.read();
-  //         if (done) {
-  //           break;
-  //         }
-
-  //         const text = new TextDecoder('utf-8').decode(value);
-
-  //         // value를 처리합니다.
-  //         console.log(text);
-
-  //         setChatList((prevChatList) => {
-  //           const lastIndex = prevChatList.length - 1;
-  //           const updatedChatList = [...prevChatList];
-  //           updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: updatedChatList[lastIndex].contents + text };
-  //           return updatedChatList;
-  //          });
-  //       }
-  //     })
-  //     .catch(error => {
-  //       console.error('Error:', error);
-  //     });
-  // });
 
   return (
     <MainCard title="">
@@ -181,7 +197,7 @@ const ChatPage = () => {
             <Typography>{agreement}</Typography>
           </AccordionDetails>
         </Accordion>
-        <Accordion>
+        <Accordion expanded={chatAccordionExpand}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel2a-content" id="panel2a-header">
             <Typography>질의응답</Typography>
           </AccordionSummary>
@@ -227,7 +243,13 @@ const ChatPage = () => {
         </Accordion>
 
         <Stack spacing={1} direction="row">
-          <TextField fullWidth value={question} placeholder="질문하기" onChange={(e) => setQuestion(e.target.value)} />
+          <TextField
+            fullWidth
+            value={question}
+            placeholder="질문하기"
+            onChange={(e) => setQuestion(e.target.value)}
+            onKeyPress={handleKeyPress}
+          />
           <IconButton aria-label="delete" onClick={handleBtnSendClick}>
             <SendIcon />
           </IconButton>
