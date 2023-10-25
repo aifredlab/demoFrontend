@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import axios from 'axios';
 
 // material-ui
 import {
@@ -32,21 +33,31 @@ import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 // ============================|| FIREBASE - REGISTER ||============================ //
 
 const AuthRegister = () => {
-  const [level, setLevel] = useState();
-  const [showPassword, setShowPassword] = useState(false);
+  const [level, setLevel] = useState(); //암호레벨
+  const [showPassword, setShowPassword] = useState(false); //암호보여주기여부
+
+  /**
+   * 암호보여주기 클릭이벤트 핸들러
+   */
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault();
-  };
+  //마우스 //TODO: 용도를 모르겠따.
+  // const handleMouseDownPassword = (event) => {
+  //   event.preventDefault();
+  // };
 
+  /**
+   *  암호 변경시 암호 level 설정
+   * @param {*} value
+   */
   const changePassword = (value) => {
     const temp = strengthIndicator(value);
     setLevel(strengthColor(temp));
   };
 
+  //초기화
   useEffect(() => {
     changePassword('');
   }, []);
@@ -55,7 +66,7 @@ const AuthRegister = () => {
     <>
       <Formik
         initialValues={{
-          name: '',          
+          name: '',
           email: '',
           company: '',
           password: '',
@@ -67,15 +78,19 @@ const AuthRegister = () => {
           password: Yup.string().max(255).required('암호가 입력되지 않았습니다.')
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
-          try {
-            setStatus({ success: false });
-            setSubmitting(false);
-          } catch (err) {
-            console.error(err);
-            setStatus({ success: false });
-            setErrors({ submit: err.message });
-            setSubmitting(false);
-          }
+          axios
+            .post('/api/member/register', { ...values })
+            .then((response) => {
+              setStatus({ success: false });
+              setSubmitting(false);
+              alert('성공');
+            })
+            .catch((error) => {
+              console.error(error);
+              setStatus({ success: false });
+              setErrors({ submit: error.message });
+              setSubmitting(false);
+            });
         }}
       >
         {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
@@ -165,7 +180,7 @@ const AuthRegister = () => {
                         <IconButton
                           aria-label="toggle password visibility"
                           onClick={handleClickShowPassword}
-                          onMouseDown={handleMouseDownPassword}
+                          // onMouseDown={handleMouseDownPassword}
                           edge="end"
                           size="large"
                         >
