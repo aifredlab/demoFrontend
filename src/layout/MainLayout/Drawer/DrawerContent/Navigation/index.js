@@ -10,7 +10,6 @@ import { useSelector } from 'react-redux';
 
 const Navigation = () => {
   const chatHistory = useSelector((state) => state.chatHistory);
-  console.log(chatHistory.length);
 
   // const chatHistoryItem = [
   //   {

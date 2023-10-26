@@ -57,7 +57,6 @@ function a11yProps(index) {
 const Profile = () => {
   const theme = useTheme();
   const auth = useSelector((state) => state.auth);
-  console.log("###" + auth);
 
   const handleLogout = async () => {
     // logout
@@ -101,7 +100,9 @@ const Profile = () => {
       >
         <Stack direction="row" spacing={2} alignItems="center" sx={{ p: 0.5 }}>
           <Avatar alt="profile user" src={avatar1} sx={{ width: 32, height: 32 }} />
-          <Typography variant="subtitle1">{auth.name}</Typography>
+          <Typography variant="subtitle1">
+            {auth.name}[{auth.email}]
+          </Typography>
         </Stack>
       </ButtonBase>
       <Popper

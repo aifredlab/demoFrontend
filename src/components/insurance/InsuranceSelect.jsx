@@ -17,8 +17,6 @@ const [value, setValue] = useState("");
   };
 
   const onchage = (e, newValue) => {
-    console.log();
-    console.log(e.target.value);
   };
 
   return (

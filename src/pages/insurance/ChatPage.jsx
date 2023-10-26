@@ -275,7 +275,6 @@ const ChatPage = () => {
               //저장 버튼 콜백
               (product) => {
                 //setPopupSelectedProduct(...product) //TODO: 이렇게 안되는 이유는?
-                console.log('zzzzdsfsdfasdfsdf');
                 setProduct({
                   companyId: product.companyId,
                   companyText: product.companyText,

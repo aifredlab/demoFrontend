@@ -29,7 +29,6 @@ import axios from 'axios';
 // project import
 import AnimateButton from 'components/@extended/AnimateButton';
 
-
 // assets
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 
@@ -39,7 +38,6 @@ const AuthLogin = () => {
   const [checked, setChecked] = React.useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
   const navigate = useNavigate();
-
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -63,29 +61,30 @@ const AuthLogin = () => {
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
           axios
-          .post('/api/member/login', { ...values }) //TODO:
-          .then((response) => {
-            setStatus({ success: false });
-            setSubmitting(false);
+            .post('/api/member/login', { ...values }) //TODO:
+            .then((response) => {
+              setStatus({ success: false });
+              setSubmitting(false);
 
-            console.log("111" + values);
-            dispatch(
-              setAuth({
-                ...values                                
-              })
-            );
+              console.log('111' + JSON.stringify(values));
+              dispatch(
+                setAuth({
+                  id: '',
+                  name: '이성준',
+                  email: 'lsj@gmail.com',
+                  company: 'aifred',
+                  loginDate: ''
+                })
+              );
 
-            navigate('/');
-            
-          })
-          .catch((error) => {
-            console.error(error);
-            setStatus({ success: false });
-            setErrors({ submit: error.message });
-            setSubmitting(false);
-          });
-
-
+              navigate('/');
+            })
+            .catch((error) => {
+              console.error(error);
+              setStatus({ success: false });
+              setErrors({ submit: error.message });
+              setSubmitting(false);
+            });
         }}
       >
         {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (

@@ -3,11 +3,11 @@ import { createSlice } from '@reduxjs/toolkit';
 
 // initial state
 const initialState = {
-    id: '',
-    name: '',
-    email: '',
-    company: '',    
-    loginDate: ''
+  id: '',
+  name: '',
+  email: '',
+  company: '',
+  loginDate: ''
 };
 
 // ==============================|| SLICE - MENU ||============================== //
@@ -17,13 +17,9 @@ const auth = createSlice({
   initialState,
   reducers: {
     setAuth(state, action) {
-      //state.chatHistoryList = action.payload;
-      //state.chatHistoryList = [...state.chatHistoryList, action.payload];
-      //state.chatHistoryList = [...state.chatHistoryList, action];
-      console.log("#########" + action)
       state = action.payload;
-      //console.log('****' + state.chatHistoryList.length);
-    },
+      return state;
+    }
   }
 });
 
