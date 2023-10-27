@@ -69,7 +69,7 @@ const AuthLogin = () => {
               console.log('111' + JSON.stringify(values));
               dispatch(
                 setAuth({
-                  id: '',
+                  id: '0000000000',
                   name: '이성준',
                   email: 'lsj@gmail.com',
                   company: 'aifred',

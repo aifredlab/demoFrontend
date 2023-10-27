@@ -6,16 +6,20 @@ import { useTheme } from '@mui/material/styles';
 import { List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 
 // assets
-import { EditOutlined, LogoutOutlined, UserOutlined} from '@ant-design/icons';
+import { EditOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 
 // ==============================|| HEADER PROFILE - PROFILE TAB ||============================== //
 
 const ProfileTab = ({ handleLogout }) => {
+  const navigate = useNavigate();
   const theme = useTheme();
-
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  //리스트 클릭
   const handleListItemClick = (event, index) => {
     setSelectedIndex(index);
+    navigate('/memberEdit');
   };
 
   return (
@@ -26,12 +30,6 @@ const ProfileTab = ({ handleLogout }) => {
         </ListItemIcon>
         <ListItemText primary="프로필 수정" />
       </ListItemButton>
-      <ListItemButton selected={selectedIndex === 1} onClick={(event) => handleListItemClick(event, 1)}>
-        <ListItemIcon>
-          <UserOutlined />
-        </ListItemIcon>
-        <ListItemText primary="프로필 확인" />
-      </ListItemButton>      
       <ListItemButton selected={selectedIndex === 2} onClick={handleLogout}>
         <ListItemIcon>
           <LogoutOutlined />

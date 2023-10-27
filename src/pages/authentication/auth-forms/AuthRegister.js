@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 // material-ui
 import {
@@ -22,6 +22,7 @@ import {
 // third party
 import * as Yup from 'yup';
 import { Formik } from 'formik';
+import axios from 'axios';
 
 // project import
 import AnimateButton from 'components/@extended/AnimateButton';
@@ -32,9 +33,10 @@ import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 
 // ============================|| FIREBASE - REGISTER ||============================ //
 
-const AuthRegister = () => {
+const AuthRegister = (param) => {
   const [level, setLevel] = useState(); //암호레벨
   const [showPassword, setShowPassword] = useState(false); //암호보여주기여부
+  const auth = useSelector((state) => state.auth);
 
   /**
    * 암호보여주기 클릭이벤트 핸들러
@@ -57,21 +59,26 @@ const AuthRegister = () => {
     setLevel(strengthColor(temp));
   };
 
+
   //초기화
   useEffect(() => {
     changePassword('');
-  }, []);
+    console.log('isRegister=' + param.isRegister);
+    console.log(JSON.stringify(auth));
+  }, [auth, param.isRegister]);
 
   return (
     <>
       <Formik
-        initialValues={{
-          name: '',
-          email: '',
-          company: '',
-          password: '',
-          submit: null
-        }}
+        initialValues={
+          {
+            name: '',
+            email: '',
+            company: '',
+            password: '',
+            submit: null
+          }
+        }
         validationSchema={Yup.object().shape({
           name: Yup.string().max(255).required('이름이 입력되지 않았습니다.'),
           email: Yup.string().email('올바른 이메일 형식이 아닙니다.').max(255).required('이메일 주소가 입력되지 않았습니다.'),
@@ -102,7 +109,7 @@ const AuthRegister = () => {
                   <OutlinedInput
                     id="name-login"
                     type="name"
-                    value={values.name}
+                    value={param.isRegister ? values.name : auth.name}
                     name="name"
                     onBlur={handleBlur}
                     onChange={handleChange}
@@ -124,7 +131,7 @@ const AuthRegister = () => {
                     fullWidth
                     error={Boolean(touched.company && errors.company)}
                     id="company-signup"
-                    value={values.company}
+                    value={param.isRegister ? values.company : auth.company}
                     name="company"
                     onBlur={handleBlur}
                     onChange={handleChange}
@@ -146,7 +153,7 @@ const AuthRegister = () => {
                     error={Boolean(touched.email && errors.email)}
                     id="email-login"
                     type="email"
-                    value={values.email}
+                    value={param.isRegister ? values.email : auth.email}
                     name="email"
                     onBlur={handleBlur}
                     onChange={handleChange}
@@ -230,7 +237,7 @@ const AuthRegister = () => {
               <Grid item xs={12}>
                 <AnimateButton>
                   <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="primary">
-                    가입
+                    {param.registerYn ? '가입' : '수정'}
                   </Button>
                 </AnimateButton>
               </Grid>
