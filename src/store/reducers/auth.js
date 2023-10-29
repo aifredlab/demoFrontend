@@ -19,8 +19,9 @@ const auth = createSlice({
     setAuth(state, action) {
       state = action.payload;
       return state;
-    },resetAuth(state, action) {
-    return initialState;
+    },
+    resetAuth(state, action) {
+      return initialState;
     }
   }
 });

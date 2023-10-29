@@ -27,7 +27,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Slide from '@mui/material/Slide';
-import chatList from '../../chatHistory/chatList';
+
 import * as React from 'react';
 import ProductSelectPage from './ProductSelectPage';
 
@@ -38,69 +38,12 @@ import { dispatch } from 'store/index';
 const ChatPage = () => {
   const [open, setOpen] = useState(false); //상품선택팝업표시여부
   const [chatAccordionExpand, setChatAccordionExpand] = useState(false); //질의응답아코디언 확장여부
-  const [product, setProduct] = useState({ companyId: '', companyText: '', insId: '', insuranceText: '' });
-  const [question, setQuestion] = useState('');
-  const [agreement, setAgreement] = useState('');
-  const [chatList, setChatList] = useState([]);
+  const [product, setProduct] = useState({ companyId: '', companyText: '', insId: '', insuranceText: '' }); //상품정보
+  const [question, setQuestion] = useState(''); //질문내용
+  const [contents, setContents] = useState(''); //약관
+  const [chatList, setChatList] = useState([]); //채팅목록
+  const [loading, setLoading] = useState(false); //api 로딩여부
 
-  /**
-   * 질문버튼 클릭
-   * @param e
-   */
-  // const handleBtnSendClick = (e) => {
-
-  //  setChatAccordionExpand(true);
-
-  //   const humanQuestion = { who: '1', contents: question };
-  //   const aiAnswer = { who: '2', contents: '' };
-
-  //   setQuestion('');
-
-  //   setChatList((prevChatList) => [
-  //     ...prevChatList,
-  //     { ...humanQuestion, key: String(prevChatList.length + 1) },
-  //     { ...aiAnswer, key: String(prevChatList.length + 2) }
-  //   ]);
-
-  //   axios
-  //     .post('/api/ask', {
-  //       question: question // 쿼리 매개변수 이름과 값을 여기에 추가
-  //       // params: {
-  //       //   question: question // 쿼리 매개변수 이름과 값을 여기에 추가
-  //       // }
-  //     })
-  //     .then((response) => {
-  //       setAgreement(response.data.agreementContents);
-
-  //       //채팅내용 set
-  //       setChatList((prevChatList) => {
-  //         const lastIndex = prevChatList.length - 1;
-  //         const updatedChatList = [...prevChatList];
-  //         updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: response.data.reply };
-  //         return updatedChatList;
-  //       });
-
-  //       //왼쪽 사이드바 채팅목록 추가
-  //       // const children = {
-  //       //   //id: 'util-typography',
-  //       //   title: question,
-  //       //   type: 'item',
-  //       //   icon: icons.FontSizeOutlined
-  //       // };
-
-  //       // chatList.children = [...chatList.children, children];
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //       //채팅내용 set
-  //       setChatList((prevChatList) => {
-  //         const lastIndex = prevChatList.length - 1;
-  //         const updatedChatList = [...prevChatList];
-  //         updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: '응답실패' };
-  //         return updatedChatList;
-  //       });
-  //     });
-  // };
   const handleClose = () => {
     setOpen(false);
   };
@@ -113,7 +56,6 @@ const ChatPage = () => {
     const aiAnswer = { who: '2', contents: '' };
 
     setQuestion('');
-    //decoratedOnClick();
 
     setChatList((prevChatList) => [
       ...prevChatList,
@@ -121,47 +63,73 @@ const ChatPage = () => {
       { ...aiAnswer, key: String(prevChatList.length + 2) }
     ]);
 
-    //fetch('streamPush', {
-    fetch('/api/ask', {
-      method: 'GET', //TODO: POST로 변경
-      headers: {
-        //'Content-Type': 'application/stream+json'
-        'Content-Type': 'text/event-stream'
-      }
-    })
-      .then(async (response) => {
-        const reader = response.body.getReader();
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) {
-            break;
-          }
+    //====================================================
+    // vector DB에서 약관조회
+    //====================================================
+    const param = {
+      question: question, //질문내용
+      content: '' //약관
+    };
 
+    setLoading(true);
+    axios
+      .post('/api/llm/askContents', param) //TODO:
+      .then((response) => {
+        console.log('response=' + JSON.stringify(response));
+        param.content = response.data;
 
-          const text = new TextDecoder('utf-8').decode(value);
+        setContents(response.data);
 
-          // value를 처리합니다.
-          console.log(text);
+        //====================================================
+        // 약관에 대한 답변 생성
+        //====================================================
+        fetch('/api/llm/ask', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/stream+json'
+          },
+          body: JSON.stringify(param)
+        })
+          .then(async (response) => {
+            const reader = response.body.getReader();
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) {
+                break;
+              }
 
-          setChatList((prevChatList) => {
-            const lastIndex = prevChatList.length - 1;
-            const updatedChatList = [...prevChatList];
-            updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: updatedChatList[lastIndex].contents + text };
-            return updatedChatList;
-          });
-        }
+              const text = new TextDecoder('utf-8').decode(value);
 
-        dispatch(
-          addChat({
-            ...chatList[chatList.length - 1],
-            type: 'item',
-            id: chatList.length - 1,
-            title: '이 상품을 가입해서 만기가 되면 보험료 전액 환급이 가능해?'
+              // value를 처리합니다.
+              console.log(text);
+
+              setChatList((prevChatList) => {
+                const lastIndex = prevChatList.length - 1;
+                const updatedChatList = [...prevChatList];
+                updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: updatedChatList[lastIndex].contents + text };
+                return updatedChatList;
+              });
+            }
+
+            dispatch(
+              addChat({
+                ...chatList[chatList.length - 1],
+                type: 'item',
+                id: chatList.length - 1,
+                title: '이 상품을 가입해서 만기가 되면 보험료 전액 환급이 가능해?'
+              })
+            );
+
+            setLoading(false);
           })
-        );
+          .catch((error) => {
+            console.error('Error:', error);
+            setLoading(false);
+          });
       })
       .catch((error) => {
-        console.error('Error:', error);
+        alert(error);
+        setLoading(false);
       });
   };
 
@@ -189,12 +157,12 @@ const ChatPage = () => {
           </Button>
         </Stack>
 
-        <Accordion>
+        <Accordion expanded={chatAccordionExpand}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
             <Typography>보험약관</Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <Typography>{agreement}</Typography>
+            <Typography>{contents}</Typography>
           </AccordionDetails>
         </Accordion>
         <Accordion expanded={chatAccordionExpand}>
@@ -249,8 +217,9 @@ const ChatPage = () => {
             placeholder="질문하기"
             onChange={(e) => setQuestion(e.target.value)}
             onKeyPress={handleKeyPress}
+            disabled={loading}
           />
-          <IconButton aria-label="delete" onClick={handleBtnSendClick}>
+          <IconButton aria-label="delete" onClick={handleBtnSendClick} disabled={loading}>
             <SendIcon />
           </IconButton>
         </Stack>

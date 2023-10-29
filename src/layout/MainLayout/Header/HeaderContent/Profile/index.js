@@ -66,7 +66,7 @@ const Profile = () => {
   /**
    * 로그아웃
    */
-  const handleLogout = async () => {
+  const handleLogout = () => {
     axios
       .post('/api/member/logout', { auth })
       .then((response) => {

@@ -22,7 +22,7 @@ const icons = {
 
 const chatList = {
   id: 'chatList',
-  title: '채팅목록',
+  title: '질문이력',
   type: 'group',
   children: [
     // {
