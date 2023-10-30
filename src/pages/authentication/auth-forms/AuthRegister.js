@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 // material-ui
 import {
@@ -21,6 +22,7 @@ import {
 // third party
 import * as Yup from 'yup';
 import { Formik } from 'formik';
+import axios from 'axios';
 
 // project import
 import AnimateButton from 'components/@extended/AnimateButton';
@@ -31,51 +33,71 @@ import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 
 // ============================|| FIREBASE - REGISTER ||============================ //
 
-const AuthRegister = () => {
-  const [level, setLevel] = useState();
-  const [showPassword, setShowPassword] = useState(false);
+const AuthRegister = (param) => {
+  const [level, setLevel] = useState(); //암호레벨
+  const [showPassword, setShowPassword] = useState(false); //암호보여주기여부
+  const auth = useSelector((state) => state.auth);
+
+  /**
+   * 암호보여주기 클릭이벤트 핸들러
+   */
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault();
-  };
+  //마우스 //TODO: 용도를 모르겠따.
+  // const handleMouseDownPassword = (event) => {
+  //   event.preventDefault();
+  // };
 
+  /**
+   *  암호 변경시 암호 level 설정
+   * @param {*} value
+   */
   const changePassword = (value) => {
     const temp = strengthIndicator(value);
     setLevel(strengthColor(temp));
   };
 
+
+  //초기화
   useEffect(() => {
     changePassword('');
-  }, []);
+    console.log('isRegister=' + param.isRegister);
+    console.log(JSON.stringify(auth));
+  }, [auth, param.isRegister]);
 
   return (
     <>
       <Formik
-        initialValues={{
-          name: '',          
-          email: '',
-          company: '',
-          password: '',
-          submit: null
-        }}
+        initialValues={
+          {
+            name: '',
+            email: '',
+            company: '',
+            password: '',
+            submit: null
+          }
+        }
         validationSchema={Yup.object().shape({
           name: Yup.string().max(255).required('이름이 입력되지 않았습니다.'),
           email: Yup.string().email('올바른 이메일 형식이 아닙니다.').max(255).required('이메일 주소가 입력되지 않았습니다.'),
           password: Yup.string().max(255).required('암호가 입력되지 않았습니다.')
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
-          try {
-            setStatus({ success: false });
-            setSubmitting(false);
-          } catch (err) {
-            console.error(err);
-            setStatus({ success: false });
-            setErrors({ submit: err.message });
-            setSubmitting(false);
-          }
+          axios
+            .post('/api/member/register', { ...values })
+            .then((response) => {
+              setStatus({ success: false });
+              setSubmitting(false);
+              alert('성공');
+            })
+            .catch((error) => {
+              console.error(error);
+              setStatus({ success: false });
+              setErrors({ submit: error.message });
+              setSubmitting(false);
+            });
         }}
       >
         {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
@@ -87,7 +109,7 @@ const AuthRegister = () => {
                   <OutlinedInput
                     id="name-login"
                     type="name"
-                    value={values.name}
+                    value={param.isRegister ? values.name : auth.name}
                     name="name"
                     onBlur={handleBlur}
                     onChange={handleChange}
@@ -109,7 +131,7 @@ const AuthRegister = () => {
                     fullWidth
                     error={Boolean(touched.company && errors.company)}
                     id="company-signup"
-                    value={values.company}
+                    value={param.isRegister ? values.company : auth.company}
                     name="company"
                     onBlur={handleBlur}
                     onChange={handleChange}
@@ -131,7 +153,7 @@ const AuthRegister = () => {
                     error={Boolean(touched.email && errors.email)}
                     id="email-login"
                     type="email"
-                    value={values.email}
+                    value={param.isRegister ? values.email : auth.email}
                     name="email"
                     onBlur={handleBlur}
                     onChange={handleChange}
@@ -165,7 +187,7 @@ const AuthRegister = () => {
                         <IconButton
                           aria-label="toggle password visibility"
                           onClick={handleClickShowPassword}
-                          onMouseDown={handleMouseDownPassword}
+                          // onMouseDown={handleMouseDownPassword}
                           edge="end"
                           size="large"
                         >
@@ -215,7 +237,7 @@ const AuthRegister = () => {
               <Grid item xs={12}>
                 <AnimateButton>
                   <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="primary">
-                    가입
+                    {param.registerYn ? '가입' : '수정'}
                   </Button>
                 </AnimateButton>
               </Grid>

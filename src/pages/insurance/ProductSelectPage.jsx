@@ -20,7 +20,7 @@ import Stack from '@mui/material/Stack';
  * @returns
  */
 export default function ProductSelectPage(props) {
-  console.log('component reloaded..............');
+  //console.log('component reloaded..............');
 
   const [companies, setCompanies] = useState([]); //보험사리스트
   const [insurances, setInsurances] = useState([]); //보험상품리스트
@@ -38,11 +38,9 @@ export default function ProductSelectPage(props) {
     axios
       .get('/api/getAllInsCompanies')
       .then((response) => {
-        console.log('getAllInsCompanies->' + response.data.length); //TODO:에러처리
+        //console.log('getAllInsCompanies->' + response.data.length); //TODO:에러처리
         setCompanies(
           response.data.map((item) => {
-            console.log(111);
-            //return { id: item.id, label: item.name };
             return { ...item, id: item.id, label: item.name };
           })
         );
@@ -50,7 +48,7 @@ export default function ProductSelectPage(props) {
         axios
           .get('/api/getAllInsurances')
           .then((response) => {
-            console.log('getAllInsurances->' + response.data.length); //TODO:에러처리
+            //  console.log('getAllInsurances->' + response.data.length); //TODO:에러처리
             setInsurances(
               response.data.map((item) => {
                 return { ...item, id: item.id, label: item.name };
@@ -84,7 +82,6 @@ export default function ProductSelectPage(props) {
         insId: selectedInsuranceId,
         insuranceText: insurances.find((item) => item.id == selectedInsuranceId)?.name
       };
-      console.log('product=' + product);
       props.saveCallBackFunc(product);
     } else {
       //보험선택
@@ -145,7 +142,7 @@ export default function ProductSelectPage(props) {
               companies={companies}
               selectCallbackFunc={(companyId) => {
                 setSelectedCompanyId(companyId);
-                console.log("sss" + companySelectRef?.current);
+                console.log('sss' + companySelectRef?.current);
                 //companySelectRef?.current?.clear(); //보험선택 초기화
               }}
             />

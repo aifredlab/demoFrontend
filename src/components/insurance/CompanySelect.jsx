@@ -11,8 +11,6 @@ export default function CompanySelect(props) {
     props.selectCallbackFunc(selected?.id);
   };
 
-   console.log(props);
-
   return (
     <>
       <Autocomplete

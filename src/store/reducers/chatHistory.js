@@ -19,11 +19,7 @@ const chatHistory = createSlice({
   initialState,
   reducers: {
     addChat(state, action) {
-      //state.chatHistoryList = action.payload;
-      //state.chatHistoryList = [...state.chatHistoryList, action.payload];
-      //state.chatHistoryList = [...state.chatHistoryList, action];
       state.push(action.payload);
-      //console.log('****' + state.chatHistoryList.length);
     },
     removeChat(state, action) {
       state.chatHistoryList = action.payload;

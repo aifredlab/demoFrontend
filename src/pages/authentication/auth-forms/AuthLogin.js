@@ -1,5 +1,8 @@
 import React from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { auth, setAuth } from 'store/reducers/auth';
+import { dispatch } from 'store/index';
 
 // material-ui
 import {
@@ -21,6 +24,7 @@ import {
 // third party
 import * as Yup from 'yup';
 import { Formik } from 'formik';
+import axios from 'axios';
 
 // project import
 import AnimateButton from 'components/@extended/AnimateButton';
@@ -32,8 +36,9 @@ import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 
 const AuthLogin = () => {
   const [checked, setChecked] = React.useState(false);
-
   const [showPassword, setShowPassword] = React.useState(false);
+  const navigate = useNavigate();
+
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
@@ -46,8 +51,8 @@ const AuthLogin = () => {
     <>
       <Formik
         initialValues={{
-          email: '',
-          password: '',
+          email: 'lsj@aifred.com',
+          password: '0000000000',
           submit: null
         }}
         validationSchema={Yup.object().shape({
@@ -55,14 +60,31 @@ const AuthLogin = () => {
           password: Yup.string().max(255).required('암호가 입력되지 않았습니다.')
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
-          try {
-            setStatus({ success: false });
-            setSubmitting(false);
-          } catch (err) {
-            setStatus({ success: false });
-            setErrors({ submit: err.message });
-            setSubmitting(false);
-          }
+          axios
+            .post('/api/member/login', { ...values }) //TODO:
+            .then((response) => {
+              setStatus({ success: false });
+              setSubmitting(false);
+
+              console.log('111' + JSON.stringify(values));
+              dispatch(
+                setAuth({
+                  id: '0000000000',
+                  name: '이성준',
+                  email: 'lsj@gmail.com',
+                  company: 'aifred',
+                  loginDate: ''
+                })
+              );
+
+              navigate('/');
+            })
+            .catch((error) => {
+              console.error(error);
+              setStatus({ success: false });
+              setErrors({ submit: error.message });
+              setSubmitting(false);
+            });
         }}
       >
         {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
@@ -136,7 +158,7 @@ const AuthLogin = () => {
                         size="small"
                       />
                     }
-                    label={<Typography variant="h6">이메일 저장</Typography>}
+                    label={<Typography variant="h6">자동 로그인</Typography>}
                   />
                   {/* <Link variant="h6" component={RouterLink} to="" color="text.primary">
                     Forgot Password?

@@ -1,5 +1,8 @@
 import PropTypes from 'prop-types';
 import { useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { auth, resetAuth } from 'store/reducers/auth';
+import { dispatch } from 'store/index';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -28,6 +31,8 @@ import SettingTab from './SettingTab';
 // assets
 import avatar1 from 'assets/images/users/avatar-1.png';
 import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
+import axios from '../../../../../../node_modules/axios/index';
+import { useNavigate } from '../../../../../../node_modules/react-router-dom/dist/index';
 
 // tab panel wrapper
 function TabPanel({ children, value, index, ...other }) {
@@ -55,9 +60,26 @@ function a11yProps(index) {
 
 const Profile = () => {
   const theme = useTheme();
+  const auth = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    // logout
+  /**
+   * 로그아웃
+   */
+  const handleLogout = () => {
+    axios
+      .post('/api/member/logout', { auth })
+      .then((response) => {
+        setStatus({ success: false });
+        setSubmitting(false);
+
+        dispatch(resetAuth());
+        navigate('/login');
+      })
+      .catch((error) => {
+        console.error(error);
+        alert(error);
+      });
   };
 
   const anchorRef = useRef(null);
@@ -98,7 +120,9 @@ const Profile = () => {
       >
         <Stack direction="row" spacing={2} alignItems="center" sx={{ p: 0.5 }}>
           <Avatar alt="profile user" src={avatar1} sx={{ width: 32, height: 32 }} />
-          <Typography variant="subtitle1">이성준</Typography>
+          <Typography variant="subtitle1">
+            {auth.name}[{auth.email}]
+          </Typography>
         </Stack>
       </ButtonBase>
       <Popper
@@ -141,7 +165,7 @@ const Profile = () => {
                           <Stack direction="row" spacing={1.25} alignItems="center">
                             <Avatar alt="profile user" src={avatar1} sx={{ width: 32, height: 32 }} />
                             <Stack>
-                              <Typography variant="h6">이성준</Typography>
+                              <Typography variant="h6">{auth.name}</Typography>
                               <Typography variant="body2" color="textSecondary">
                                 개발자
                               </Typography>
