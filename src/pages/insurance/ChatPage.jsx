@@ -64,7 +64,7 @@ const ChatPage = () => {
     ]);
 
     //====================================================
-    // vector DB에서 약관조회
+    // 약관조회 API 호출
     //====================================================
     const param = {
       question: question, //질문내용
@@ -81,7 +81,7 @@ const ChatPage = () => {
         setContents(response.data);
 
         //====================================================
-        // 약관에 대한 답변 생성
+        // 약관에 대한 답변 생성 API 호출
         //====================================================
         fetch('/api/llm/ask', {
           method: 'POST',
@@ -98,15 +98,15 @@ const ChatPage = () => {
                 break;
               }
 
-              const text = new TextDecoder('utf-8').decode(value);
+              const chunk = new TextDecoder('utf-8').decode(value);
 
               // value를 처리합니다.
-              console.log(text);
+              console.log(chunk);
 
               setChatList((prevChatList) => {
                 const lastIndex = prevChatList.length - 1;
                 const updatedChatList = [...prevChatList];
-                updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: updatedChatList[lastIndex].contents + text };
+                updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: updatedChatList[lastIndex].contents + chunk };
                 return updatedChatList;
               });
             }

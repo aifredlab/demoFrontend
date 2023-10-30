@@ -1,6 +1,8 @@
 // types
 import { createSlice } from '@reduxjs/toolkit';
 
+import uuid from 'react-uuid';
+
 // initial state
 // const initialState = {
 //   id: '',
@@ -10,6 +12,7 @@ import { createSlice } from '@reduxjs/toolkit';
 //   dateTime: ''
 // };
 
+
 const initialState = [];
 
 // ==============================|| SLICE - MENU ||============================== //
@@ -18,10 +21,13 @@ const chatHistory = createSlice({
   name: 'chatHistory',
   initialState,
   reducers: {
-    addChat(state, action) {
+    addChatHistory(state, action) {
       state.push(action.payload);
     },
-    removeChat(state, action) {
+    removeChatHistory(state, action) {
+      state.chatHistoryList = action.payload;
+    },
+    removeAllChatHistory(state, action) {
       state.chatHistoryList = action.payload;
     }
   }
