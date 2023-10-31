@@ -36,26 +36,22 @@ import { addChat } from 'store/reducers/chatHistory';
 import { dispatch } from 'store/index';
 
 const ChatPage = () => {
+  const LOADING_MESSAGE = 'Loading...';
   const [open, setOpen] = useState(false); //상품선택팝업표시여부
   const [chatAccordionExpand, setChatAccordionExpand] = useState(false); //질의응답아코디언 확장여부
   const [product, setProduct] = useState({ companyId: '', companyText: '', insId: '', insuranceText: '' }); //상품정보
   const [question, setQuestion] = useState(''); //질문내용
   const [contents, setContents] = useState(''); //약관
-  const [chatList, setChatList] = useState([]); //채팅목록
+  const [chatList, setChatList] = useState([]); //화면에 표시되는 채팅목록
   const [loading, setLoading] = useState(false); //api 로딩여부
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  //스트림으로 요청
   const handleBtnSendClick = (e) => {
     setChatAccordionExpand(true);
 
     const humanQuestion = { who: '1', contents: question };
     const aiAnswer = { who: '2', contents: '' };
 
-    setQuestion('');
+    setQuestion(''); //채팅 inputbox 초기화
 
     setChatList((prevChatList) => [
       ...prevChatList,
@@ -68,17 +64,19 @@ const ChatPage = () => {
     //====================================================
     const param = {
       question: question, //질문내용
+      questionHistory: chatList.filter((data) => data.who == 1), //질문이력
       content: '' //약관
     };
+    console.log("#####################################")
 
     setLoading(true);
     axios
       .post('/api/llm/askContents', param) //TODO:
       .then((response) => {
         console.log('response=' + JSON.stringify(response));
-        param.content = response.data;
+        param.content = response.data; //약관내용
 
-        setContents(response.data);
+        setContents(response.data); //약관내용 화면에 표시
 
         //====================================================
         // 약관에 대한 답변 생성 API 호출
@@ -111,25 +109,41 @@ const ChatPage = () => {
               });
             }
 
-            dispatch(
-              addChat({
-                ...chatList[chatList.length - 1],
-                type: 'item',
-                id: chatList.length - 1,
-                title: '이 상품을 가입해서 만기가 되면 보험료 전액 환급이 가능해?'
-              })
-            );
+            // dispatch(
+            //   addChat({
+            //     ...chatList[chatList.length - 1],
+            //     type: 'item',
+            //     id: chatList.length - 1,
+            //     title: '이 상품을 가입해서 만기가 되면 보험료 전액 환급이 가능해?'
+            //   })
+            // );
 
             setLoading(false);
           })
           .catch((error) => {
             console.error('Error:', error);
             setLoading(false);
+            if (chatList[chatList.length - 1].contents == '') {
+              setChatList((prevChatList) => {
+                const lastIndex = prevChatList.length - 1;
+                const updatedChatList = [...prevChatList];
+                updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: 'error' };
+                return updatedChatList;
+              });
+            }
           });
       })
       .catch((error) => {
-        alert(error);
+        console.error('Error:', error);
         setLoading(false);
+        if (chatList[chatList.length - 1].contents == '') {
+          setChatList((prevChatList) => {
+            const lastIndex = prevChatList.length - 1;
+            const updatedChatList = [...prevChatList];
+            updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: 'error' };
+            return updatedChatList;
+          });
+        }
       });
   };
 
@@ -231,7 +245,7 @@ const ChatPage = () => {
         maxWidth={'xs'}
         open={open}
         keepMounted
-        onClose={handleClose}
+        onClose={() => setOpen(false)}
         aria-describedby="alert-dialog-slide-description"
       >
         <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
