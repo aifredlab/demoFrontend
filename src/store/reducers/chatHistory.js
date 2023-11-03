@@ -1,8 +1,6 @@
 // types
 import { createSlice } from '@reduxjs/toolkit';
 
-import uuid from 'react-uuid';
-
 // initial state
 // const initialState = {
 //   id: '',
@@ -11,7 +9,6 @@ import uuid from 'react-uuid';
 //   content: '',
 //   dateTime: ''
 // };
-
 
 const initialState = [];
 

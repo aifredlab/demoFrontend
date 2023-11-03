@@ -36,29 +36,23 @@ import { addChat } from 'store/reducers/chatHistory';
 import { dispatch } from 'store/index';
 
 const ChatPage = () => {
-
-
   const [conversationId, setConversationId] = useState();
+  const LOADING_MESSAGE = 'Loading...';
   const [open, setOpen] = useState(false); //상품선택팝업표시여부
   const [chatAccordionExpand, setChatAccordionExpand] = useState(false); //질의응답아코디언 확장여부
   const [product, setProduct] = useState({ companyId: '', companyText: '', insId: '', insuranceText: '' }); //상품정보
   const [question, setQuestion] = useState(''); //질문내용
   const [contents, setContents] = useState(''); //약관
-  const [chatList, setChatList] = useState([]); //채팅목록
+  const [chatList, setChatList] = useState([]); //화면에 표시되는 채팅목록
   const [loading, setLoading] = useState(false); //api 로딩여부
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  //스트림으로 요청
   const handleBtnSendClick = (e) => {
     setChatAccordionExpand(true);
 
     const humanQuestion = { who: '1', text: question };
     const aiAnswer = { who: '2', text: '' };
 
-    setQuestion('');
+    setQuestion(''); //채팅 inputbox 초기화
 
     setChatList((prevChatList) => [
       ...prevChatList,
@@ -72,8 +66,10 @@ const ChatPage = () => {
     setLoading(true);
     const param = {
       question: question, //질문내용
+      questionHistory: chatList.filter((data) => data.who == 1), //질문이력
       content: '' //약관
     };
+
     axios.post('/api/llm/askContents', param).then((response) => {
       console.log('response=' + JSON.stringify(response));
       param.content = response.data;
@@ -246,7 +242,7 @@ const ChatPage = () => {
         maxWidth={'xs'}
         open={open}
         keepMounted
-        onClose={handleClose}
+        onClose={() => setOpen(false)}
         aria-describedby="alert-dialog-slide-description"
       >
         <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
