@@ -36,6 +36,9 @@ import { addChat } from 'store/reducers/chatHistory';
 import { dispatch } from 'store/index';
 
 const ChatPage = () => {
+
+
+  const [conversationId, setConversationId] = useState();
   const [open, setOpen] = useState(false); //상품선택팝업표시여부
   const [chatAccordionExpand, setChatAccordionExpand] = useState(false); //질의응답아코디언 확장여부
   const [product, setProduct] = useState({ companyId: '', companyText: '', insId: '', insuranceText: '' }); //상품정보
@@ -52,8 +55,8 @@ const ChatPage = () => {
   const handleBtnSendClick = (e) => {
     setChatAccordionExpand(true);
 
-    const humanQuestion = { who: '1', contents: question };
-    const aiAnswer = { who: '2', contents: '' };
+    const humanQuestion = { who: '1', text: question };
+    const aiAnswer = { who: '2', text: '' };
 
     setQuestion('');
 
@@ -66,71 +69,83 @@ const ChatPage = () => {
     //====================================================
     // 약관조회 API 호출
     //====================================================
+    setLoading(true);
     const param = {
       question: question, //질문내용
       content: '' //약관
     };
+    axios.post('/api/llm/askContents', param).then((response) => {
+      console.log('response=' + JSON.stringify(response));
+      param.content = response.data;
 
-    setLoading(true);
-    axios
-      .post('/api/llm/askContents', param) //TODO:
-      .then((response) => {
-        console.log('response=' + JSON.stringify(response));
-        param.content = response.data;
+      setContents(response.data);
 
-        setContents(response.data);
-
-        //====================================================
-        // 약관에 대한 답변 생성 API 호출
-        //====================================================
-        fetch('/api/llm/ask', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/stream+json'
-          },
-          body: JSON.stringify(param)
-        })
-          .then(async (response) => {
-            const reader = response.body.getReader();
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) {
-                break;
-              }
-
-              const chunk = new TextDecoder('utf-8').decode(value);
-
-              // value를 처리합니다.
-              console.log(chunk);
-
-              setChatList((prevChatList) => {
-                const lastIndex = prevChatList.length - 1;
-                const updatedChatList = [...prevChatList];
-                updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: updatedChatList[lastIndex].contents + chunk };
-                return updatedChatList;
-              });
+      //====================================================
+      // 약관에 대한 답변 생성 API 호출
+      //====================================================
+      fetch('/api/llm/ask', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/stream+json'
+        },
+        body: JSON.stringify(param)
+      })
+        .then(async (response) => {
+          const reader = response.body.getReader();
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              break;
             }
 
-            dispatch(
-              addChat({
-                ...chatList[chatList.length - 1],
-                type: 'item',
-                id: chatList.length - 1,
-                title: '이 상품을 가입해서 만기가 되면 보험료 전액 환급이 가능해?'
-              })
-            );
+            const chunk = new TextDecoder('utf-8').decode(value);
 
-            setLoading(false);
-          })
-          .catch((error) => {
-            console.error('Error:', error);
-            setLoading(false);
-          });
-      })
-      .catch((error) => {
-        alert(error);
-        setLoading(false);
-      });
+            // value를 처리합니다.
+            console.log(chunk);
+
+            setChatList((prevChatList) => {
+              const lastIndex = prevChatList.length - 1;
+              const updatedChatList = [...prevChatList];
+              updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], text: updatedChatList[lastIndex].text + chunk };
+              return updatedChatList;
+            });
+          } //end of while
+
+          //====================================================
+          // 채팅 이력 저장
+          //====================================================
+          axios
+            .post('/api/chatHistory/createChatHistory', {
+              conversationId: conversationId,
+              question: chatList[chatList.length - 2].text,
+              answer: chatList[chatList.length - 1].text,
+              content: contents
+            })
+            .then((response) => {
+              console.log('response=' + JSON.stringify(response));
+
+              // dispatch(
+              //   addChat({
+              //     ...chatList[chatList.length - 1],
+              //     type: 'item',
+              //     id: chatList.length - 1,
+              //     title: '이 상품을 가입해서 만기가 되면 보험료 전액 환급이 가능해?'
+              //   })
+              // );
+
+              setLoading(false);
+            }) //end of then
+            .catch((error) => {
+              console.error('Error:', error);
+              setLoading(false);
+            });
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+
+          setLoading(false);
+        });
+    });
   };
 
   const handleKeyPress = (e) => {
@@ -188,7 +203,7 @@ const ChatPage = () => {
                           <Person3Icon />
                         </Avatar>
                       </ListItemAvatar>
-                      <ListItemText primary={chat.contents} />
+                      <ListItemText primary={chat.text} />
                     </ListItem>
                   );
                 } else {
@@ -201,7 +216,7 @@ const ChatPage = () => {
                           <PsychologyIcon />
                         </Avatar>
                       </ListItemAvatar>
-                      <ListItemText primary={chat.contents || 'Loading...'} />
+                      <ListItemText primary={chat.text || 'Loading...'} />
                     </ListItem>
                   );
                 }
