@@ -39,18 +39,33 @@ const ChatPage = () => {
   const [conversationId, setConversationId] = useState();
   const LOADING_MESSAGE = 'Loading...';
   const [open, setOpen] = useState(false); //상품선택팝업표시여부
-  const [chatAccordionExpand, setChatAccordionExpand] = useState(false); //질의응답아코디언 확장여부
+  const [chatAccordionExpand, setChatAccordionExpand] = useState(true); //질의응답아코디언 확장여부
   const [product, setProduct] = useState({ companyId: '', companyText: '', insId: '', insuranceText: '' }); //상품정보
   const [question, setQuestion] = useState(''); //질문내용
-  const [contents, setContents] = useState(''); //약관
+  const [contents, setContents] = useState(''); //참조컨텐츠[약관등등...]
   const [chatList, setChatList] = useState([]); //화면에 표시되는 채팅목록
   const [loading, setLoading] = useState(false); //api 로딩여부
 
+  const chatHistory = useSelector((state) => state.chatHistory);
+
+  useEffect(() => {
+    console.log('ChatPage() starts.................');
+
+    if (chatHistory.id) {
+      axios.get('/api/chatHistory/getChatHistoryDetail/' + chatHistory.id).then((response) => {
+        console.log('response=' + JSON.stringify(response));
+        setChatList(response.data);
+      });
+    }
+  }, [chatHistory]);
+  //,[chatHistory]);
+
+  //보내기 버튼 클릭
   const handleBtnSendClick = (e) => {
     setChatAccordionExpand(true);
 
-    const humanQuestion = { who: '1', text: question };
-    const aiAnswer = { who: '2', text: '' };
+    const humanQuestion = { type: '1', text: question };
+    const aiAnswer = { type: '2', text: '' };
 
     setQuestion(''); //채팅 inputbox 초기화
 
@@ -66,7 +81,7 @@ const ChatPage = () => {
     setLoading(true);
     const param = {
       question: question, //질문내용
-      questionHistory: chatList.filter((data) => data.who == 1), //질문이력
+      questionHistory: chatList.filter((data) => data.type == 1), //질문이력
       content: '' //약관
     };
 
@@ -88,6 +103,7 @@ const ChatPage = () => {
       })
         .then(async (response) => {
           const reader = response.body.getReader();
+          let answer = '';
           while (true) {
             const { done, value } = await reader.read();
             if (done) {
@@ -95,6 +111,7 @@ const ChatPage = () => {
             }
 
             const chunk = new TextDecoder('utf-8').decode(value);
+            answer += chunk;
 
             // value를 처리합니다.
             console.log(chunk);
@@ -113,8 +130,8 @@ const ChatPage = () => {
           axios
             .post('/api/chatHistory/createChatHistory', {
               conversationId: conversationId,
-              question: chatList[chatList.length - 2].text,
-              answer: chatList[chatList.length - 1].text,
+              question: question,
+              answer: answer,
               content: contents
             })
             .then((response) => {
@@ -188,7 +205,7 @@ const ChatPage = () => {
               }}
             >
               {chatList.map((chat, i) => {
-                if (chat.who == '1') {
+                if (chat.type == '1') {
                   //사용자
                   //return <ListGroup.Item variant="primary" key={chat.key}><img src={iconHuman} width='25' height='25'></img> {chat.contents}</ListGroup.Item>
 

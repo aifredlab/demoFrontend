@@ -10,7 +10,11 @@ import { createSlice } from '@reduxjs/toolkit';
 //   dateTime: ''
 // };
 
-const initialState = [];
+const initialState = {
+  id: '',
+  title: '',
+  createdAt: ''
+};
 
 // ==============================|| SLICE - MENU ||============================== //
 
@@ -18,18 +22,15 @@ const chatHistory = createSlice({
   name: 'chatHistory',
   initialState,
   reducers: {
-    addChatHistory(state, action) {
-      state.push(action.payload);
+    setChatHistory(state, action) {
+      return action.payload;
     },
-    removeChatHistory(state, action) {
-      state.chatHistoryList = action.payload;
-    },
-    removeAllChatHistory(state, action) {
-      state.chatHistoryList = action.payload;
+    resetChatHistory(state, action) {
+      return initialState;
     }
   }
 });
 
 export default chatHistory.reducer;
 
-export const { addChat, removeChat } = chatHistory.actions;
+export const { setChatHistory, resetChatHistory } = chatHistory.actions;

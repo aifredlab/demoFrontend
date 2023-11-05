@@ -2,6 +2,8 @@ import PropTypes from 'prop-types';
 import { forwardRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { dispatch } from 'store/index';
+import { setChatHistory } from 'store/reducers/chatHistory';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -14,7 +16,7 @@ import { activeItem } from 'store/reducers/menu';
 
 const NavItem = ({ item, level }) => {
   const theme = useTheme();
-  const dispatch = useDispatch();
+  //const dispatch = useDispatch();
   const { pathname } = useLocation();
 
   const { drawerOpen, openItem } = useSelector((state) => state.menu);
@@ -30,7 +32,12 @@ const NavItem = ({ item, level }) => {
   }
 
   const itemHandler = (id) => {
-    dispatch(activeItem({ openItem: [id] }));
+    //dispatch(activeItem({ openItem: [id] }));
+    dispatch(
+      setChatHistory({
+        id: id
+      })
+    );
   };
 
   const Icon = item.icon;
@@ -40,7 +47,7 @@ const NavItem = ({ item, level }) => {
   // active menu item on page load
   useEffect(() => {
     if (pathname.includes(item.url)) {
-      dispatch(activeItem({ openItem: [item.id] }));
+      //dispatch(activeItem({ openItem: [item.id] }));
     }
     // eslint-disable-next-line
   }, [pathname]);
