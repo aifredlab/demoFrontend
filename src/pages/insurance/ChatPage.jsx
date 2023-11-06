@@ -52,6 +52,7 @@ const ChatPage = () => {
     console.log('ChatPage() starts.................');
 
     if (chatHistory.id) {
+      setConversationId(chatHistory.id);
       axios.get('/api/chatHistory/getChatHistoryDetail/' + chatHistory.id).then((response) => {
         console.log('response=' + JSON.stringify(response));
         setChatList(response.data);
@@ -136,6 +137,7 @@ const ChatPage = () => {
             })
             .then((response) => {
               console.log('response=' + JSON.stringify(response));
+              setConversationId(response.data);
 
               // dispatch(
               //   addChat({
