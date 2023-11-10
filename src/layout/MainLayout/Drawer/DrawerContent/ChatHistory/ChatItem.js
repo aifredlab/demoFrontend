@@ -2,19 +2,27 @@ import PropTypes from 'prop-types';
 import { forwardRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { dispatch } from 'store/index';
+import { setChatHistory } from 'store/reducers/chatHistory';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import { Avatar, Chip, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
+
+// assets
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+
+// third party
+import axios from 'axios';
 
 // project import
 import { activeItem } from 'store/reducers/menu';
 
 // ==============================|| NAVIGATION - LIST ITEM ||============================== //
 
-const NavItem = ({ item, level }) => {
+const ChatItem = ({ item, level }) => {
   const theme = useTheme();
-  const dispatch = useDispatch();
+  //const dispatch = useDispatch();
   const { pathname } = useLocation();
 
   const { drawerOpen, openItem } = useSelector((state) => state.menu);
@@ -30,7 +38,23 @@ const NavItem = ({ item, level }) => {
   }
 
   const itemHandler = (id) => {
-    dispatch(activeItem({ openItem: [id] }));
+    //dispatch(activeItem({ openItem: [id] }));
+    dispatch(
+      setChatHistory({
+        id: id
+      })
+    );
+  };
+
+  const deleteClickHandler = (e, id) => {
+    //TODO: confirm 
+
+    axios
+      .delete('/api/chatHistory/removeChatHistory/' + id)
+      .then((response) => { alert('삭제완료'); })
+      .catch((error) => { alert(error) });
+
+    e.stopPropagation();
   };
 
   const Icon = item.icon;
@@ -40,7 +64,7 @@ const NavItem = ({ item, level }) => {
   // active menu item on page load
   useEffect(() => {
     if (pathname.includes(item.url)) {
-      dispatch(activeItem({ openItem: [item.id] }));
+      //dispatch(activeItem({ openItem: [item.id] }));
     }
     // eslint-disable-next-line
   }, [pathname]);
@@ -102,11 +126,11 @@ const NavItem = ({ item, level }) => {
             }),
             ...(!drawerOpen &&
               isSelected && {
-                bgcolor: 'primary.lighter',
-                '&:hover': {
-                  bgcolor: 'primary.lighter'
-                }
-              })
+              bgcolor: 'primary.lighter',
+              '&:hover': {
+                bgcolor: 'primary.lighter'
+              }
+            })
           }}
         >
           {itemIcon}
@@ -115,7 +139,16 @@ const NavItem = ({ item, level }) => {
       {(drawerOpen || (!drawerOpen && level !== 1)) && (
         <ListItemText
           primary={
-            <Typography variant="h6" sx={{ color: isSelected ? iconSelectedColor : textColor }}>
+            <Typography
+              variant="h6"
+              sx={{
+                color: isSelected ? iconSelectedColor : textColor,
+                maxWidth: '190px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
+            >
               {item.title}
             </Typography>
           }
@@ -130,13 +163,14 @@ const NavItem = ({ item, level }) => {
           avatar={item.chip.avatar && <Avatar>{item.chip.avatar}</Avatar>}
         />
       )}
+      <EditOutlined /> <DeleteOutlined onClick={(e) => deleteClickHandler(e, item.id)} />
     </ListItemButton>
   );
 };
 
-NavItem.propTypes = {
+ChatItem.propTypes = {
   item: PropTypes.object,
   level: PropTypes.number
 };
 
-export default NavItem;
+export default ChatItem;

@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import { Box, List, Typography } from '@mui/material';
 
 // project import
-import NavItem from './NavItem';
+import ChatItem from './ChatItem';
 
 // ==============================|| NAVIGATION - LIST GROUP ||============================== //
 
@@ -22,7 +22,7 @@ const NavGroup = ({ item }) => {
           </Typography>
         );
       case 'item':
-        return <NavItem key={menuItem.id} item={menuItem} level={1} />;
+        return <ChatItem key={menuItem.id} item={menuItem} level={1} />;
       default:
         return (
           <Typography key={menuItem.id} variant="h6" color="error" align="center">
@@ -41,7 +41,6 @@ const NavGroup = ({ item }) => {
             <Typography variant="subtitle2" color="textSecondary">
               {item.title}
             </Typography>
-            {/* only available in paid version */}
           </Box>
         )
       }

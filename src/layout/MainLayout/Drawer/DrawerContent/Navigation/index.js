@@ -9,19 +9,6 @@ import { useSelector } from 'react-redux';
 // ==============================|| DRAWER CONTENT - NAVIGATION ||============================== //
 
 const Navigation = () => {
-  const chatHistory = useSelector((state) => state.chatHistory);
-
-  // const chatHistoryItem = [
-  //   {
-  //     id: 'chatList',
-  //     title: '채팅목록',
-  //     type: 'group',
-  //     children: chatHistory
-  //   }
-  // ];
-
-  // const menuItem = { items: chatHistoryItem };
-
   const navGroups = menuItem.items.map((item) => {
     switch (item.type) {
       case 'group':
