@@ -9,12 +9,18 @@ import { setChatHistory } from 'store/reducers/chatHistory';
 import { useTheme } from '@mui/material/styles';
 import { Avatar, Chip, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
 
+// assets
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+
+// third party
+import axios from 'axios';
+
 // project import
 import { activeItem } from 'store/reducers/menu';
 
 // ==============================|| NAVIGATION - LIST ITEM ||============================== //
 
-const NavItem = ({ item, level }) => {
+const ChatItem = ({ item, level }) => {
   const theme = useTheme();
   //const dispatch = useDispatch();
   const { pathname } = useLocation();
@@ -38,6 +44,17 @@ const NavItem = ({ item, level }) => {
         id: id
       })
     );
+  };
+
+  const deleteClickHandler = (e, id) => {
+    //TODO: confirm 
+
+    axios
+      .delete('/api/chatHistory/removeChatHistory/' + id)
+      .then((response) => { alert('삭제완료'); })
+      .catch((error) => { alert(error) });
+
+    e.stopPropagation();
   };
 
   const Icon = item.icon;
@@ -109,11 +126,11 @@ const NavItem = ({ item, level }) => {
             }),
             ...(!drawerOpen &&
               isSelected && {
-                bgcolor: 'primary.lighter',
-                '&:hover': {
-                  bgcolor: 'primary.lighter'
-                }
-              })
+              bgcolor: 'primary.lighter',
+              '&:hover': {
+                bgcolor: 'primary.lighter'
+              }
+            })
           }}
         >
           {itemIcon}
@@ -122,7 +139,16 @@ const NavItem = ({ item, level }) => {
       {(drawerOpen || (!drawerOpen && level !== 1)) && (
         <ListItemText
           primary={
-            <Typography variant="h6" sx={{ color: isSelected ? iconSelectedColor : textColor }}>
+            <Typography
+              variant="h6"
+              sx={{
+                color: isSelected ? iconSelectedColor : textColor,
+                maxWidth: '190px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
+            >
               {item.title}
             </Typography>
           }
@@ -137,13 +163,14 @@ const NavItem = ({ item, level }) => {
           avatar={item.chip.avatar && <Avatar>{item.chip.avatar}</Avatar>}
         />
       )}
+      <EditOutlined /> <DeleteOutlined onClick={(e) => deleteClickHandler(e, item.id)} />
     </ListItemButton>
   );
 };
 
-NavItem.propTypes = {
+ChatItem.propTypes = {
   item: PropTypes.object,
   level: PropTypes.number
 };
 
-export default NavItem;
+export default ChatItem;

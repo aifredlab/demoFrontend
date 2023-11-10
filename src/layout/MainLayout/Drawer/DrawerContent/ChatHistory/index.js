@@ -6,6 +6,9 @@ import ChatGroup from './ChatGroup';
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 
+// assets
+import { ChromeOutlined, QuestionOutlined, CodeOutlined } from '@ant-design/icons';
+
 import axios from 'axios';
 // ==============================|| DRAWER CONTENT - CHAT HISTORY ||============================== //
 
@@ -18,12 +21,13 @@ const ChatHistory = () => {
       .get('/api/chatHistory/getChatHistoryList')
       .then((response) => {
         console.log('response=' + JSON.stringify(response));
+        //const chatHistoryList = response?.data?.map((item) => ({ ...item, type: 'item', icon: CodeOutlined }));
         const chatHistoryList = response?.data?.map((item) => ({ ...item, type: 'item' }));
 
         const chatHistoryItem = [
           {
             id: 'chatList',
-            title: '채팅목록',
+            title: '대화이력',
             type: 'group',
             children: chatHistoryList
           }

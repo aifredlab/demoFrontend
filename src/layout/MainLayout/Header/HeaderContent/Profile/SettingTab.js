@@ -38,7 +38,9 @@ const SettingTab = () => {
 
     axios
       .delete('/api/chatHistory/removeChatHistoryList')
-      .then((response) => {})
+      .then((response) => {
+        //TODO: 
+      })
       .catch((error) => {alert(error)});
   };
 
