@@ -8,6 +8,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
+import ListItemButton from '@mui/material/ListItemButton';
 import Avatar from '@mui/material/Avatar';
 import Person3Icon from '@mui/icons-material/Person3';
 import PsychologyIcon from '@mui/icons-material/Psychology';
@@ -28,15 +29,20 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Slide from '@mui/material/Slide';
 
+import DraftsIcon from '@mui/icons-material/Drafts';
+
 import * as React from 'react';
 import ProductSelectPage from './ProductSelectPage';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { addChat } from 'store/reducers/chatHistory';
 import { dispatch } from 'store/index';
+import ListItemIcon from 'themes/overrides/ListItemIcon';
 
 const ChatPage = () => {
   const [conversationId, setConversationId] = useState();
+  const [contentId, setContentId] = useState();
+
   const LOADING_MESSAGE = 'Loading...';
   const [open, setOpen] = useState(false); //상품선택팝업표시여부
   const [chatAccordionExpand, setChatAccordionExpand] = useState(true); //질의응답아코디언 확장여부
@@ -51,11 +57,15 @@ const ChatPage = () => {
   useEffect(() => {
     console.log('ChatPage() starts.................');
 
+    //왼쪽 사이드바에서 대화이력 선택시
     if (chatHistory.id) {
       setConversationId(chatHistory.id);
       axios.get('/api/chatHistory/getChatHistoryDetail/' + chatHistory.id).then((response) => {
         console.log('response=' + JSON.stringify(response));
         setChatList(response.data);
+
+        //마지막 대화의 연관 컨텐츠 출력
+        setContents(response.data[response.data.length - 1].content);
       });
     }
   }, [chatHistory]);
@@ -81,6 +91,8 @@ const ChatPage = () => {
     //====================================================
     setLoading(true);
     const param = {
+      conversationId: conversationId,
+      contentId: contentId,
       question: question, //질문내용
       questionHistory: chatList.filter((data) => data.type == 1), //질문이력
       content: '' //약관
@@ -88,9 +100,11 @@ const ChatPage = () => {
 
     axios.post('/api/llm/askContents', param).then((response) => {
       console.log('response=' + JSON.stringify(response));
-      param.content = response.data;
+      param.content = response.data.content;
+      param.conversationId = response.data.conversationId;
+      param.contentId = response.data.contentId;
 
-      setContents(response.data);
+      setContents(response.data.content);
 
       //====================================================
       // 약관에 대한 답변 생성 API 호출
@@ -104,15 +118,14 @@ const ChatPage = () => {
       })
         .then(async (response) => {
           const reader = response.body.getReader();
-          let answer = '';
           while (true) {
             const { done, value } = await reader.read();
             if (done) {
+              setLoading(false);
               break;
             }
 
             const chunk = new TextDecoder('utf-8').decode(value);
-            answer += chunk;
 
             // value를 처리합니다.
             console.log(chunk);
@@ -124,40 +137,9 @@ const ChatPage = () => {
               return updatedChatList;
             });
           } //end of while
-
-          //====================================================
-          // 채팅 이력 저장
-          //====================================================
-          axios
-            .post('/api/chatHistory/createChatHistory', {
-              conversationId: conversationId,
-              question: question,
-              answer: answer,
-              content: contents
-            })
-            .then((response) => {
-              console.log('response=' + JSON.stringify(response));
-              setConversationId(response.data);
-
-              // dispatch(
-              //   addChat({
-              //     ...chatList[chatList.length - 1],
-              //     type: 'item',
-              //     id: chatList.length - 1,
-              //     title: '이 상품을 가입해서 만기가 되면 보험료 전액 환급이 가능해?'
-              //   })
-              // );
-
-              setLoading(false);
-            }) //end of then
-            .catch((error) => {
-              console.error('Error:', error);
-              setLoading(false);
-            });
         })
         .catch((error) => {
           console.error('Error:', error);
-
           setLoading(false);
         });
     });
@@ -168,6 +150,10 @@ const ChatPage = () => {
       handleBtnSendClick();
     }
   };
+
+  const handleContentClick = (e, idx) => {
+    setContents(chatList[idx].content);
+  }
 
   return (
     <MainCard title="">
@@ -231,7 +217,15 @@ const ChatPage = () => {
                           <PsychologyIcon />
                         </Avatar>
                       </ListItemAvatar>
+
+                      {/* <ListItemIcon>
+                        <PsychologyIcon />
+                      </ListItemIcon> */}
+
                       <ListItemText primary={chat.text || 'Loading...'} />
+                      <Avatar>
+                        <DraftsIcon onClick={(e) => handleContentClick(e, i)} />
+                      </Avatar>
                     </ListItem>
                   );
                 }
