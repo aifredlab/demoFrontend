@@ -6,7 +6,7 @@ import { dispatch } from 'store/index';
 import { setChatHistory } from 'store/reducers/chatHistory';
 
 // material-ui
-import { useTheme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles'; 
 import { Avatar, Chip, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
 
 // assets
