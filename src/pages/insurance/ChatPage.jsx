@@ -8,7 +8,6 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
-import ListItemButton from '@mui/material/ListItemButton';
 import Avatar from '@mui/material/Avatar';
 import Person3Icon from '@mui/icons-material/Person3';
 import PsychologyIcon from '@mui/icons-material/Psychology';
@@ -29,56 +28,34 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Slide from '@mui/material/Slide';
 
-import DraftsIcon from '@mui/icons-material/Drafts';
-
 import * as React from 'react';
 import ProductSelectPage from './ProductSelectPage';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { addChat } from 'store/reducers/chatHistory';
 import { dispatch } from 'store/index';
-import ListItemIcon from 'themes/overrides/ListItemIcon';
 
 const ChatPage = () => {
-  const [conversationId, setConversationId] = useState();
-  const [contentId, setContentId] = useState();
-
-  const LOADING_MESSAGE = 'Loading...';
   const [open, setOpen] = useState(false); //상품선택팝업표시여부
-  const [chatAccordionExpand, setChatAccordionExpand] = useState(true); //질의응답아코디언 확장여부
+  const [chatAccordionExpand, setChatAccordionExpand] = useState(false); //질의응답아코디언 확장여부
   const [product, setProduct] = useState({ companyId: '', companyText: '', insId: '', insuranceText: '' }); //상품정보
   const [question, setQuestion] = useState(''); //질문내용
-  const [contents, setContents] = useState(''); //참조컨텐츠[약관등등...]
-  const [chatList, setChatList] = useState([]); //화면에 표시되는 채팅목록
+  const [contents, setContents] = useState(''); //약관
+  const [chatList, setChatList] = useState([]); //채팅목록
   const [loading, setLoading] = useState(false); //api 로딩여부
 
-  const chatHistory = useSelector((state) => state.chatHistory);
+  const handleClose = () => {
+    setOpen(false);
+  };
 
-  useEffect(() => {
-    console.log('ChatPage() starts.................');
-
-    //왼쪽 사이드바에서 대화이력 선택시
-    if (chatHistory.id) {
-      setConversationId(chatHistory.id);
-      axios.get('/api/chatHistory/getChatHistoryDetail/' + chatHistory.id).then((response) => {
-        console.log('response=' + JSON.stringify(response));
-        setChatList(response.data);
-
-        //마지막 대화의 연관 컨텐츠 출력
-        setContents(response.data[response.data.length - 1].content);
-      });
-    }
-  }, [chatHistory]);
-  //,[chatHistory]);
-
-  //보내기 버튼 클릭
+  //스트림으로 요청
   const handleBtnSendClick = (e) => {
     setChatAccordionExpand(true);
 
-    const humanQuestion = { type: '1', text: question };
-    const aiAnswer = { type: '2', text: '' };
+    const humanQuestion = { who: '1', contents: question };
+    const aiAnswer = { who: '2', contents: '' };
 
-    setQuestion(''); //채팅 inputbox 초기화
+    setQuestion('');
 
     setChatList((prevChatList) => [
       ...prevChatList,
@@ -87,62 +64,73 @@ const ChatPage = () => {
     ]);
 
     //====================================================
-    // 약관조회 API 호출
+    // vector DB에서 약관조회
     //====================================================
-    setLoading(true);
     const param = {
-      conversationId: conversationId,
-      contentId: contentId,
       question: question, //질문내용
-      questionHistory: chatList.filter((data) => data.type == 1), //질문이력
       content: '' //약관
     };
 
-    axios.post('/api/llm/askContents', param).then((response) => {
-      console.log('response=' + JSON.stringify(response));
-      param.content = response.data.content;
-      param.conversationId = response.data.conversationId;
-      param.contentId = response.data.contentId;
+    setLoading(true);
+    axios
+      .post('/api/llm/askContents', param) //TODO:
+      .then((response) => {
+        console.log('response=' + JSON.stringify(response));
+        param.content = response.data;
 
-      setContents(response.data.content);
+        setContents(response.data);
 
-      //====================================================
-      // 약관에 대한 답변 생성 API 호출
-      //====================================================
-      fetch('/api/llm/ask', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/stream+json'
-        },
-        body: JSON.stringify(param)
-      })
-        .then(async (response) => {
-          const reader = response.body.getReader();
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-              setLoading(false);
-              break;
+        //====================================================
+        // 약관에 대한 답변 생성
+        //====================================================
+        fetch('/api/llm/ask', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/stream+json'
+          },
+          body: JSON.stringify(param)
+        })
+          .then(async (response) => {
+            const reader = response.body.getReader();
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) {
+                break;
+              }
+
+              const text = new TextDecoder('utf-8').decode(value);
+
+              // value를 처리합니다.
+              console.log(text);
+
+              setChatList((prevChatList) => {
+                const lastIndex = prevChatList.length - 1;
+                const updatedChatList = [...prevChatList];
+                updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], contents: updatedChatList[lastIndex].contents + text };
+                return updatedChatList;
+              });
             }
 
-            const chunk = new TextDecoder('utf-8').decode(value);
+            dispatch(
+              addChat({
+                ...chatList[chatList.length - 1],
+                type: 'item',
+                id: chatList.length - 1,
+                title: '이 상품을 가입해서 만기가 되면 보험료 전액 환급이 가능해?'
+              })
+            );
 
-            // value를 처리합니다.
-            console.log(chunk);
-
-            setChatList((prevChatList) => {
-              const lastIndex = prevChatList.length - 1;
-              const updatedChatList = [...prevChatList];
-              updatedChatList[lastIndex] = { ...updatedChatList[lastIndex], text: updatedChatList[lastIndex].text + chunk };
-              return updatedChatList;
-            });
-          } //end of while
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-          setLoading(false);
-        });
-    });
+            setLoading(false);
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+            setLoading(false);
+          });
+      })
+      .catch((error) => {
+        alert(error);
+        setLoading(false);
+      });
   };
 
   const handleKeyPress = (e) => {
@@ -150,10 +138,6 @@ const ChatPage = () => {
       handleBtnSendClick();
     }
   };
-
-  const handleContentClick = (e, idx) => {
-    setContents(chatList[idx].content);
-  }
 
   return (
     <MainCard title="">
@@ -193,7 +177,7 @@ const ChatPage = () => {
               }}
             >
               {chatList.map((chat, i) => {
-                if (chat.type == '1') {
+                if (chat.who == '1') {
                   //사용자
                   //return <ListGroup.Item variant="primary" key={chat.key}><img src={iconHuman} width='25' height='25'></img> {chat.contents}</ListGroup.Item>
 
@@ -204,7 +188,7 @@ const ChatPage = () => {
                           <Person3Icon />
                         </Avatar>
                       </ListItemAvatar>
-                      <ListItemText primary={chat.text} />
+                      <ListItemText primary={chat.contents} />
                     </ListItem>
                   );
                 } else {
@@ -217,15 +201,7 @@ const ChatPage = () => {
                           <PsychologyIcon />
                         </Avatar>
                       </ListItemAvatar>
-
-                      {/* <ListItemIcon>
-                        <PsychologyIcon />
-                      </ListItemIcon> */}
-
-                      <ListItemText primary={chat.text || 'Loading...'} />
-                      <Avatar>
-                        <DraftsIcon onClick={(e) => handleContentClick(e, i)} />
-                      </Avatar>
+                      <ListItemText primary={chat.contents || 'Loading...'} />
                     </ListItem>
                   );
                 }
@@ -255,7 +231,7 @@ const ChatPage = () => {
         maxWidth={'xs'}
         open={open}
         keepMounted
-        onClose={() => setOpen(false)}
+        onClose={handleClose}
         aria-describedby="alert-dialog-slide-description"
       >
         <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
