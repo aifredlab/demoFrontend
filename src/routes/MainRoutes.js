@@ -12,6 +12,12 @@ const ChatPage = Loadable(lazy(() => import('pages/insurance/ChatPage')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
+//TODO: 임시..startup 시에 /free 로 가는거 수정해야함
+const Temp = () => {
+  location.href = '/';
+  return <></>;
+};
+
 const MainRoutes = {
   path: '/',
   element: <MainLayout />,
@@ -19,6 +25,10 @@ const MainRoutes = {
     {
       path: '/',
       element: <ChatPage />
+    },
+    {
+      path: '/free',
+      element: <Temp />
     }
   ]
 };
