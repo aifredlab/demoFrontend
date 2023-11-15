@@ -7,10 +7,11 @@ import { combineReducers } from 'redux';
 // project import
 import menu from './menu';
 import chatHistory from './chatHistory';
+import updateChecker from './updateChecker';
 import auth from './auth';
 
 // ==============================|| COMBINE REDUCERS ||============================== //
-const reducers = combineReducers({ menu, chatHistory, auth });
+const reducers = combineReducers({ menu, chatHistory, auth, updateChecker });
 // const persistConfig = {
 //   key: 'root',
 //   storage

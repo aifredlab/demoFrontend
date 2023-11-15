@@ -39,6 +39,8 @@ import { addChat } from 'store/reducers/chatHistory';
 import { dispatch } from 'store/index';
 import ListItemIcon from 'themes/overrides/ListItemIcon';
 
+import { hasChatHistoryUpdate } from 'store/reducers/updateChecker';
+
 const ChatPage = () => {
   const [conversationId, setConversationId] = useState();
   const [contentId, setContentId] = useState();
@@ -53,6 +55,9 @@ const ChatPage = () => {
   const [loading, setLoading] = useState(false); //api 로딩여부
 
   const chatHistory = useSelector((state) => state.chatHistory);
+  const dispatch = useDispatch();
+  const updateChecker = useSelector((state) => state.updateChecker);
+  
 
   useEffect(() => {
     console.log('ChatPage() starts.................');
@@ -137,9 +142,13 @@ const ChatPage = () => {
               return updatedChatList;
             });
           } //end of while
+
+          //사이드바 채팅 이력 update
+          dispatch(hasChatHistoryUpdate({ hasChatHistoryUpdate: true }));
         })
         .catch((error) => {
-          console.error('Error:', error);
+          //console.error('Error:', error);
+          alert(error);
           setLoading(false);
         });
     });
@@ -153,7 +162,7 @@ const ChatPage = () => {
 
   const handleContentClick = (e, idx) => {
     setContents(chatList[idx].content);
-  }
+  };
 
   return (
     <MainCard title="">
