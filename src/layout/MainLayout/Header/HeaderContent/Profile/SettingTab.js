@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import * as React from 'react';
+import { useDispatch } from 'react-redux';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -13,10 +14,12 @@ import axios from 'axios';
 
 //project
 import Alert from 'components/Alert';
+import { hasChatHistoryUpdate } from 'store/reducers/updateChecker';
 
 // ==============================|| HEADER PROFILE - SETTING TAB ||============================== //
 
 const SettingTab = () => {
+  const dispatch = useDispatch();
   const theme = useTheme();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [open, setOpen] = React.useState(false);
@@ -39,7 +42,8 @@ const SettingTab = () => {
     axios
       .delete('/api/chatHistory/removeChatHistoryList')
       .then((response) => {
-        //TODO: 
+        //사이드바 채팅 이력 update
+        dispatch(hasChatHistoryUpdate({ hasChatHistoryUpdate: true }));
       })
       .catch((error) => {alert(error)});
   };

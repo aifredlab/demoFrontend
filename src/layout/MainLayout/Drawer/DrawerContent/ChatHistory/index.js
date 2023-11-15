@@ -5,6 +5,7 @@ import { Box, Typography } from '@mui/material';
 import ChatGroup from './ChatGroup';
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
+import { hasChatHistoryUpdate } from 'store/reducers/updateChecker';
 
 // assets
 import { ChromeOutlined, QuestionOutlined, CodeOutlined } from '@ant-design/icons';
@@ -13,10 +14,13 @@ import axios from 'axios';
 // ==============================|| DRAWER CONTENT - CHAT HISTORY ||============================== //
 
 const ChatHistory = () => {
+  const updateChecker = useSelector((state) => state.updateChecker);
   const [menuItem, setMenuItem] = useState({});
 
   useEffect(() => {
     console.log('ChatHistory() starts.................');
+
+    //if (hasChatHistoryUpdate == true) {
     axios
       .get('/api/chatHistory/getChatHistoryList')
       .then((response) => {
@@ -39,7 +43,8 @@ const ChatHistory = () => {
       .catch((error) => {
         console.error('Error:', error);
       });
-  }, []);
+    //}
+  }, [updateChecker]);
 
   return (
     <Box sx={{ pt: 2 }}>
